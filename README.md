@@ -1,3 +1,3 @@
 # CrossLanguageSimilarity
 
-# how to compute cross-language sentences similarity ? 
+how to compute cross-language sentences similarity ? 
