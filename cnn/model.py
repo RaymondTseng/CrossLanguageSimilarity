@@ -2,16 +2,24 @@
 import tensorflow as tf
 import numpy as np
 
-class Model:
+class CNN:
 
-    def __init__(self, args):
-        self.args = args
+    def __init__(self, seq_length, class_num, filter_sizes, filters_num,
+                 embedding_size, learning_rate, l2_reg_lambda=0.0):
+        self.seq_length = seq_length
+        self.class_num = class_num
+        self.filter_sizes = filter_sizes
+        self.filters_num = filters_num
+        self.embedding_size = embedding_size
+        self.learning_rate = learning_rate
+        self.l2_reg_lambda = l2_reg_lambda
+
         self.build_network()
 
     def build_network(self):
-        self.sources = tf.placeholder(tf.int32, [self.args['time_step'], None], name='input')
-        self.targets = tf.placeholder(tf.int32, [self.args['time_step'], None], name='target')
-        self.scores = tf.placeholder(tf.float32, [None], name='score')
+        self.sources = tf.placeholder(tf.int32, [None, self.seq_length], name='sources')
+        self.targets = tf.placeholder(tf.int32, [None, self.seq_length], name='targets')
+        self.scores = tf.placeholder(tf.float32, [None], name='scores')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
         self.l2_loss = tf.constant(0.0)
@@ -20,26 +28,26 @@ class Model:
         # embedding layer
         with tf.variable_scope('embedding', reuse=True):
             embedding = tf.get_variable('embedding')
-            sources = tf.nn.embedding_lookup(embedding, tf.transpose(self.sources))
-            targets = tf.nn.embedding_lookup(embedding, tf.transpose(self.targets))
+            sources = tf.nn.embedding_lookup(embedding, self.sources)
+            targets = tf.nn.embedding_lookup(embedding, self.targets)
 
         inputs = tf.concat([sources, targets], axis=1)
         inputs = tf.expand_dims(inputs, -1)
 
-        with tf.variable_scope('cnn'):
+        with tf.name_scope('cnn'):
             pooled_outputs = []
-            for i, filter_size in enumerate(self.args['filter_sizes']):
+            for i, filter_size in enumerate(self.filter_sizes):
                 with tf.name_scope("conv-maxpool-%s" % filter_size):
-                    filter_shape = [filter_size, self.args['embedding_size'], 1, self.args['num_filters']]
+                    filter_shape = [filter_size, self.embedding_size, 1, self.filters_num]
                     W = self.weight_variable(filter_shape)
-                    b = self.bias_variable([self.args['num_filters']])
+                    b = self.bias_variable([self.filters_num])
                     conv = tf.nn.conv2d(inputs, W, [1, 1, 1, 1], padding='VALID')
                     h = tf.nn.relu(tf.nn.bias_add(conv, b))
-                    pooled = tf.nn.max_pool(h, ksize=[1, self.args['time_step'] * 2 - filter_size + 1, 1, 1],
+                    pooled = tf.nn.max_pool(h, ksize=[1, self.seq_length * 2 - filter_size + 1, 1, 1],
                                             strides=[1, 1, 1, 1], padding='VALID')
                     pooled_outputs.append(pooled)
 
-            all_num_filters = self.args['num_filters'] * len(self.args['filter_sizes'])
+            all_num_filters = self.filters_num * len(self.filter_sizes)
             h_pool = tf.concat(pooled_outputs, 3)
             h_pool_flat = tf.reshape(h_pool, [-1, all_num_filters])
 
@@ -47,8 +55,8 @@ class Model:
             h_drop = tf.nn.dropout(h_pool_flat, self.keep_prob)
 
         with tf.name_scope('output'):
-            W = self.weight_variable([all_num_filters, self.args['class_num']])
-            b = self.bias_variable([self.args['class_num']])
+            W = self.weight_variable([all_num_filters, self.class_num])
+            b = self.bias_variable([self.class_num])
             self.l2_loss += tf.nn.l2_loss(W)
             self.l2_loss += tf.nn.l2_loss(b)
             self.logits = tf.matmul(h_drop, W) + b
@@ -69,14 +77,11 @@ class Model:
             self.pearson = mid1 / mid2
             tf.summary.scalar('pearson', self.pearson)
 
-        with tf.name_scope('train'):
-            self.optimizer = tf.train.AdamOptimizer(self.args['learning_rate']).minimize(self.loss)
+        with tf.name_scope('training'):
+            self.optimizer = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss)
 
     def train_step(self, sources_batch, targets_batch, scores_batch, keep_prob):
         feed_dict = {}
-        sources_batch = np.transpose(sources_batch)
-        targets_batch = np.transpose(targets_batch)
-        scores_batch = np.transpose(scores_batch)
         feed_dict[self.sources] = sources_batch
         feed_dict[self.targets] = targets_batch
         feed_dict[self.scores] = scores_batch
@@ -86,11 +91,8 @@ class Model:
         return [self.optimizer, self.pearson, self.loss], feed_dict
 
 
-    def test_step(self, sources_batch, targets_batch, scores_batch, keep_prob):
+    def dev_step(self, sources_batch, targets_batch, scores_batch, keep_prob):
         feed_dict = {}
-        sources_batch = np.transpose(sources_batch)
-        targets_batch = np.transpose(targets_batch)
-        scores_batch = np.transpose(scores_batch)
         feed_dict[self.sources] = sources_batch
         feed_dict[self.targets] = targets_batch
         feed_dict[self.scores] = scores_batch

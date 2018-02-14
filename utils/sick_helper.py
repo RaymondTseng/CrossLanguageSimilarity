@@ -10,4 +10,4 @@ def load_csv(path):
     sources = df_sick.s1.values
     targets = df_sick.s2.values
     scores = np.asarray(map(float, df_sick.score.values), dtype=np.float32)
-    return scores, sources, targets
+    return sources, targets, scores

@@ -27,22 +27,25 @@ def load_csv(path):
 
 def load_embedding(path):
     wv = word2vec.load(path)
+    vocab = wv.vocab
+    word2idx = pd.Series(range(1, len(vocab) + 1), index=vocab)
+    word2idx['<unk>'] = 0
     word_embedding = wv.vectors
     word_mean = np.mean(word_embedding, axis=0)
-    word_embedding = np.vstack([word_embedding, word_mean])
-    return word_embedding
+    word_embedding = np.vstack([word_mean, word_embedding])
+    return word2idx, word_embedding
 
-def word2id(sentences, word2idx, time_step):
+def word2id(sentences, word2idx, seq_length):
     idx = []
     for sentence in sentences:
         words = sentence.translate(None, string.punctuation).split(' ')
         words = [word.lower() for word in words]
-        id = [word2idx.get(word, word2idx['UNK']) for word in words]
-        if len(id) < time_step:
-            for _ in range(len(id), time_step):
-                id.append(word2idx['UNK'])
-        elif len(id) > time_step:
-            id = id[:time_step]
+        id = [word2idx.get(word, word2idx['<unk>']) for word in words]
+        if len(id) < seq_length:
+            for _ in range(len(id), seq_length):
+                id.append(word2idx['<unk>'])
+        elif len(id) > seq_length:
+            id = id[:seq_length]
         idx.append(id)
     return idx
 
