@@ -1,10 +1,9 @@
 # -*- coding:utf-8 -*-
 
 import tensorflow as tf
-import load
+from utils import load
 from model import Model
 import os
-from sklearn.metrics import classification_report
 import numpy as np
 
 train_path = '/home/raymond/Downloads/data/sts-train.csv'
@@ -46,6 +45,9 @@ if __name__ == '__main__':
     word2idx = load.load_word2idx(word2idx_path)
     sources = load.word2id(sources, word2idx, args['time_step'])
     targets = load.word2id(targets, word2idx, args['time_step'])
+    if args['is_training']:
+        dev_sources = load.word2id(dev_sources, word2idx, args['time_step'])
+        dev_targets = load.word2id(dev_targets, word2idx, args['time_step'])
     embedding = load.load_embedding(embedding_path)
 
     print 'load embedding...'
@@ -79,7 +81,7 @@ if __name__ == '__main__':
 
             if (global_step + 1) % 1000 == 0:
                 dev_sources_batch, dev_targets_batch, dev_scores_batch = load.random_batch(dev_sources, dev_targets, dev_scores,
-                                                                               args['batch_size'])
+                                                                                           args['batch_size'])
                 ops, feed_dict = model.test_step(dev_sources_batch, dev_targets_batch, dev_scores_batch)
                 pearson, loss = session.run(ops, feed_dict=feed_dict)
 

@@ -4,6 +4,8 @@ import csv
 import numpy as np
 import string
 import random
+import word2vec
+import pandas as pd
 
 train_path = '/home/raymond/Downloads/data/sts-train.csv'
 embedding_path = '/home/raymond/Downloads/data/glove.6B.50d.txt'
@@ -24,16 +26,11 @@ def load_csv(path):
     return scores, sources, targets
 
 def load_embedding(path):
-    embedding = []
-    f = open(path, 'r')
-    for line in f.readlines():
-        line = line.strip()
-        if line:
-            temp = line.split(' ')[1:]
-            embedding.append(map(float, temp))
-    unk = np.mean(embedding, axis=1)
-    embedding.append(unk)
-    return embedding
+    wv = word2vec.load(path)
+    word_embedding = wv.vectors
+    word_mean = np.mean(word_embedding, axis=0)
+    word_embedding = np.vstack([word_embedding, word_mean])
+    return word_embedding
 
 def word2id(sentences, word2idx, time_step):
     idx = []
