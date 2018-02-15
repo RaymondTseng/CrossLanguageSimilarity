@@ -7,33 +7,6 @@ import random
 import word2vec
 import pandas as pd
 
-train_path = '/home/raymond/Downloads/data/sts-train.csv'
-embedding_path = '/home/raymond/Downloads/data/glove.6B.50d.txt'
-word2idx_path = 'word2idx.txt'
-
-def load_csv(path):
-    csv_reader = csv.reader(open(path))
-    scores = []
-    sources = []
-    targets = []
-    for row in csv_reader:
-        temp = row[0].split('\t')
-        if len(temp) >= 7:
-            scores.append(float(temp[4]))
-            sources.append(temp[5])
-            targets.append(temp[6])
-
-    return scores, sources, targets
-
-def load_embedding(path):
-    wv = word2vec.load(path)
-    vocab = wv.vocab
-    word2idx = pd.Series(range(1, len(vocab) + 1), index=vocab)
-    word2idx['<unk>'] = 0
-    word_embedding = wv.vectors
-    word_mean = np.mean(word_embedding, axis=0)
-    word_embedding = np.vstack([word_mean, word_embedding])
-    return word2idx, word_embedding
 
 def word2id(sentences, word2idx, seq_length):
     idx = []

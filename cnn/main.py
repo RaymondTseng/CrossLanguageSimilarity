@@ -1,9 +1,9 @@
 # -*- coding:utf-8 -*-
-#! /usr/bin/env python
+
 import tensorflow as tf
-from utils import load, sick_helper
+from utils import utils, data_helper
 from model import CNN
-import os
+import numpy as np
 
 
 
@@ -17,15 +17,15 @@ tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)
 tf.flags.DEFINE_float("l2_reg_lambda", 1, "L2 regularization lambda (default: 0.0)")
 
 # Data Parameters
-tf.flags.DEFINE_string('data_path', '/home/raymond/Downloads/data/SICK-train.txt', 'data source')
+tf.flags.DEFINE_string('data_path', '/home/raymond/Downloads/data/SICK.txt', 'data set')
 tf.flags.DEFINE_string('embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'word embedding source')
 tf.flags.DEFINE_string('save_path', '../save', 'save model')
 tf.flags.DEFINE_string('log_path', '../log', 'log training data')
-tf.flags.DEFINE_float("train_sample_percentage", .9, "Percentage of the training data to use for validation")
+tf.flags.DEFINE_float("train_sample_percentage", .8, "Percentage of the training data to use for validation")
 
 # Training Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 40000, "Number of training epochs (default: 200)")
+tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
 tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
 tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
@@ -44,18 +44,40 @@ print ""
 
 # Load data
 print "Loading data..."
-sources, targets, scores = sick_helper.load_csv(FLAGS.data_path)
-word2idx, word_embedding = load.load_embedding(FLAGS.embedding_path)
-sources = load.word2id(sources, word2idx, FLAGS.seq_length)
-targets = load.word2id(targets, word2idx, FLAGS.seq_length)
-sample_num = len(scores)
-train_num = int(sample_num * FLAGS.train_sample_percentage)
+sources, targets, scores = data_helper.load_sick_data(FLAGS.data_path)
+word2idx, word_embedding = data_helper.load_embedding(FLAGS.embedding_path)
+sources = utils.word2id(sources, word2idx, FLAGS.seq_length)
+targets = utils.word2id(targets, word2idx, FLAGS.seq_length)
+
 
 # Split train/test set
-# TODO: This is very crude, should use cross-validation
-train_sources, dev_sources = sources[:train_num], sources[train_num:]
-train_targets, dev_targets = targets[:train_num], targets[train_num:]
-train_scores, dev_scores = scores[:train_num], scores[train_num:]
+# 5 fold cross-validation
+sample_num = len(scores)
+fold_num = int(sample_num / 5)
+# 1 - 2, 3, 4, 5
+train_sources, dev_sources = sources[fold_num:], sources[:fold_num]
+train_targets, dev_targets = targets[fold_num:], targets[:fold_num]
+train_scores, dev_scores = scores[fold_num:], scores[:fold_num]
+
+# 2 - 1, 3, 4, 5
+# train_sources, dev_sources = sources[:fold_num] + sources[2 * fold_num:], sources[fold_num: 2 * fold_num]
+# train_targets, dev_targets = targets[:fold_num] + targets[2 * fold_num:], targets[fold_num: 2 * fold_num]
+# train_scores, dev_scores = np.append(scores[:fold_num], scores[2 * fold_num:]), scores[fold_num: 2 * fold_num]
+
+# 3 - 1, 2, 4, 5
+# train_sources, dev_sources = sources[: 2 * fold_num] + sources[3 * fold_num:], sources[2 * fold_num: 3 * fold_num]
+# train_targets, dev_targets = targets[: 2 * fold_num] + targets[3 * fold_num:], targets[2 * fold_num: 3 * fold_num]
+# train_scores, dev_scores = np.append(scores[: 2 * fold_num], scores[3 * fold_num:]), scores[2 * fold_num: 3 * fold_num]
+
+# 4 - 1, 2, 3, 5
+# train_sources, dev_sources = sources[: 3 * fold_num] + sources[4 * fold_num:], sources[3 * fold_num: 4 * fold_num]
+# train_targets, dev_targets = targets[: 3 * fold_num] + targets[4 * fold_num:], targets[3 * fold_num: 4 * fold_num]
+# train_scores, dev_scores = np.append(scores[: 3 * fold_num], scores[4 * fold_num:]), scores[3 * fold_num: 4 * fold_num]
+
+# 5 - 1, 2, 3, 4
+# train_sources, dev_sources = sources[: 4 * fold_num], sources[4 * fold_num:]
+# train_targets, dev_targets = targets[: 4 * fold_num], targets[4 * fold_num:]
+# train_scores, dev_scores = scores[: 4 * fold_num], scores[4 * fold_num:]
 print "Train/Dev split: {:d}/{:d}".format(len(train_scores), len(dev_scores))
 
 # Training
@@ -84,7 +106,7 @@ with tf.Graph().as_default():
         # training loop, for each batch
 
         for step in range(FLAGS.epochs_num):
-            sources_batch, targets_batch, scores_batch = load.random_batch(sources, targets, scores, FLAGS.batch_size)
+            sources_batch, targets_batch, scores_batch = utils.random_batch(sources, targets, scores, FLAGS.batch_size)
 
             ops, feed_dict = model.train_step(sources_batch, targets_batch, scores_batch, FLAGS.keep_prob)
             summaries, _, pearson, loss = session.run([merged] + ops, feed_dict=feed_dict)
@@ -99,9 +121,9 @@ with tf.Graph().as_default():
 
                 print '--- evaluation --- loss: %.3f --- pearson: %.3f ---' % (loss, pearson)
 
-            if (step + 1) % FLAGS.save_every == 0:
-                path = os.path.join(FLAGS.save_path, 'model-' + str(step + 1))
-                saver.save(session, path)
-
-                print '--- save model --- model path: ' + path
+            # if (step + 1) % FLAGS.save_every == 0:
+            #     path = os.path.join(FLAGS.save_path, 'model-' + str(step + 1))
+            #     saver.save(session, path)
+            #
+            #     print '--- save model --- model path: ' + path
 

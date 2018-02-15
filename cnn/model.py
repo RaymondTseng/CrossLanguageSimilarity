@@ -23,7 +23,6 @@ class CNN:
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
         self.l2_loss = tf.constant(0.0)
-        self.l2_reg_lambda = 1.0
 
         # embedding layer
         with tf.variable_scope('embedding', reuse=True):
