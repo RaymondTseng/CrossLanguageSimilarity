@@ -64,9 +64,9 @@ fold_num = int(sample_num / 5)
 # train_scores, dev_scores = scores[fold_num:], scores[:fold_num]
 
 # 2 - 1, 3, 4, 5
-train_sources, dev_sources = sources[:fold_num] + sources[2 * fold_num:], sources[fold_num: 2 * fold_num]
-train_targets, dev_targets = targets[:fold_num] + targets[2 * fold_num:], targets[fold_num: 2 * fold_num]
-train_scores, dev_scores = np.append(scores[:fold_num], scores[2 * fold_num:]), scores[fold_num: 2 * fold_num]
+# train_sources, dev_sources = sources[:fold_num] + sources[2 * fold_num:], sources[fold_num: 2 * fold_num]
+# train_targets, dev_targets = targets[:fold_num] + targets[2 * fold_num:], targets[fold_num: 2 * fold_num]
+# train_scores, dev_scores = np.append(scores[:fold_num], scores[2 * fold_num:]), scores[fold_num: 2 * fold_num]
 
 # 3 - 1, 2, 4, 5
 # train_sources, dev_sources = sources[: 2 * fold_num] + sources[3 * fold_num:], sources[2 * fold_num: 3 * fold_num]
@@ -79,9 +79,9 @@ train_scores, dev_scores = np.append(scores[:fold_num], scores[2 * fold_num:]), 
 # train_scores, dev_scores = np.append(scores[: 3 * fold_num], scores[4 * fold_num:]), scores[3 * fold_num: 4 * fold_num]
 
 # 5 - 1, 2, 3, 4
-# train_sources, dev_sources = sources[: 4 * fold_num], sources[4 * fold_num:]
-# train_targets, dev_targets = targets[: 4 * fold_num], targets[4 * fold_num:]
-# train_scores, dev_scores = scores[: 4 * fold_num], scores[4 * fold_num:]
+train_sources, dev_sources = sources[: 4 * fold_num], sources[4 * fold_num:]
+train_targets, dev_targets = targets[: 4 * fold_num], targets[4 * fold_num:]
+train_scores, dev_scores = scores[: 4 * fold_num], scores[4 * fold_num:]
 
 # train, dev split
 # train_sources, train_targets, train_scores = sources, targets, scores
