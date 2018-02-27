@@ -4,21 +4,31 @@ import csv
 import numpy as np
 import string
 import random
+from nltk.tokenize import WordPunctTokenizer
+import time
 import word2vec
 import pandas as pd
 
+def get_id(word):
+    word = word.lower()
+    return word2idx_.get(word, word2idx_['<unk>'])
+    # if word in word2idx_:
+    #     return word2idx_[word]
+    # else:
+    #     return word2idx_['<unk>']
 
 def word2id(sentences, word2idx, seq_length):
     idx = []
+    global word2idx_
+    word2idx_ = word2idx
     for sentence in sentences:
-        words = sentence.translate(None, string.punctuation).split(' ')
-        words = [word.lower() for word in words]
-        id = [word2idx.get(word, word2idx['<unk>']) for word in words]
-        if len(id) < seq_length:
-            for _ in range(len(id), seq_length):
-                id.append(word2idx['<unk>'])
-        elif len(id) > seq_length:
-            id = id[:seq_length]
+        words = WordPunctTokenizer().tokenize(sentence)
+        if len(words) < seq_length:
+            for _ in range(len(words), seq_length):
+                words.append('<unk>')
+        elif len(words) > seq_length:
+            words = words[:seq_length]
+        id = map(get_id, words)
         idx.append(id)
     return idx
 
@@ -35,13 +45,22 @@ def load_word2idx(path):
 def random_batch(sources, targets, scores, batch_size):
     sources_batch = []
     targets_batch = []
-    scores_batch = []
-    for _ in range(batch_size):
-        i = random.randint(0, len(sources) - 1)
-        sources_batch.append(sources[i])
-        targets_batch.append(targets[i])
-        scores_batch.append(scores[i])
-    return sources_batch, targets_batch, scores_batch
+    if scores:
+        scores_batch = []
+        for _ in range(batch_size):
+            i = random.randint(0, len(sources) - 1)
+            sources_batch.append(sources[i])
+            targets_batch.append(targets[i])
+            scores_batch.append(scores[i])
+        return sources_batch, targets_batch, scores_batch
+    else:
+        for _ in range(batch_size):
+            i = random.randint(0, len(sources) - 1)
+            sources_batch.append(sources[i])
+            targets_batch.append(targets[i])
+        return sources_batch, targets_batch
+
+
 
 
 

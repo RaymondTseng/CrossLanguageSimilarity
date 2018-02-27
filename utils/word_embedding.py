@@ -6,12 +6,24 @@ import logging
 
 tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
-corpus_path = '/home/raymond/Downloads/spanish_news/'
+news_path = '/home/raymond/Downloads/spanish_news/'
+others_path = '/home/raymond/Downloads/spanish_others/'
 save_path = '/home/raymond/Downloads/data/spanish.news.50d.model'
 
 # all_words = []
 #
-# for (root, dirs, files) in os.walk(corpus_path):
+# for (root, dirs, files) in os.walk(news_path):
+#     for file_name in files:
+#         file_name = os.path.join(root, file_name)
+#         f = open(file_name, 'r')
+#         for line in f.readlines():
+#             line = line.strip().decode('utf-8')
+#             sentences = tokenizer.tokenize(line)
+#             for sentence in sentences:
+#                 words = WordPunctTokenizer().tokenize(sentence)
+#                 all_words.append(words)
+#         f.close()
+# for (root, dirs, files) in os.walk(others_path):
 #     for file_name in files:
 #         file_name = os.path.join(root, file_name)
 #         f = open(file_name, 'r')

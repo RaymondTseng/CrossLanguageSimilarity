@@ -109,3 +109,9 @@ class CNN:
         """Create a bias variable with appropriate initialization."""
         initial = tf.constant(0.1, shape=shape)
         return tf.Variable(initial)
+
+a = [
+    [[1, 2]], [[1, 2]], [[1, 2]]
+]
+b = [[[2], [1]], [[2], [1]], [[2], [1]]]
+print(np.array(b) - np.array(a))

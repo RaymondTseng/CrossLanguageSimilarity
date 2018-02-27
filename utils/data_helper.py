@@ -2,8 +2,19 @@ import pandas as pd
 import csv
 import word2vec
 import numpy as np
+import os
 
-
+def load_cross_lang_sentence_data(path):
+    source_sentences = []
+    target_sentences = []
+    f = open(path, 'r')
+    for line in f.readlines():
+        line = line.strip()
+        temp = line.split('\t')
+        source_sentences.append(temp[0])
+        target_sentences.append(temp[1])
+    f.close()
+    return source_sentences, target_sentences
 
 def load_sick_data(path):
     df_sick = pd.read_csv(path, sep="\t", usecols=[1, 2, 4], names=['s1', 's2', 'score'],
@@ -31,7 +42,9 @@ def load_sts_data(path):
 def load_embedding(path):
     wv = word2vec.load(path)
     vocab = wv.vocab
-    word2idx = pd.Series(range(1, len(vocab) + 1), index=vocab)
+    word2idx = {}
+    for i in range(1, len(vocab) + 1):
+        word2idx[vocab[i-1]] = i
     word2idx['<unk>'] = 0
     word_embedding = wv.vectors
     word_mean = np.mean(word_embedding, axis=0)
