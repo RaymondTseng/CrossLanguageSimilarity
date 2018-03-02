@@ -2,19 +2,23 @@
 
 import tensorflow as tf
 from utils import utils, data_helper
-from model import CNN_Attention
+from model import CNN_Attention, CNN, BiLSTM, GAN
 import numpy as np
 
 
 
 # Model Hyper Parameters
 tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
+tf.flags.DEFINE_integer('seq_length', 72, 'sequence length (default 36)')
+tf.flags.DEFINE_integer('class_num', 2, 'classes number (default 1)')
 tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
 tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
 tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
 tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
+
+#BiLSTM
+tf.flags.DEFINE_integer('hidden_num', 128, 'Number of units in hidden layer (default: 128)')
+tf.flags.DEFINE_integer('layer_num', 2, 'Number of hidden layer (default: 1)')
 
 # Data Parameters
 tf.flags.DEFINE_string('data_path', '/home/raymond/Downloads/data/cls.txt', 'source data')
@@ -45,7 +49,7 @@ print ""
 
 # Load data
 print "Loading data..."
-sources, targets = data_helper.load_cross_lang_sentence_data(FLAGS.data_path)
+sources, targets, scores = data_helper.load_cross_lang_sentence_data(FLAGS.data_path)
 source_word2idx, source_word_embedding = data_helper.load_embedding(FLAGS.source_embedding_path)
 target_word2idx, target_word_embedding = data_helper.load_embedding(FLAGS.target_embedding_path)
 sources = utils.word2id(sources, source_word2idx, FLAGS.seq_length)
@@ -70,8 +74,11 @@ with tf.Graph().as_default():
             target_embedding = tf.get_variable('target_embedding', shape=source_word_embedding.shape, dtype=tf.float32,
                                         initializer=tf.constant_initializer(target_word_embedding), trainable=True)
 
-        model = CNN_Attention(FLAGS.seq_length, FLAGS.class_num, list(map(int, FLAGS.filter_sizes.split(','))),
-                    FLAGS.filters_num, FLAGS.embedding_size, FLAGS.learning_rate, FLAGS.l2_reg_lambda)
+        # model = BiLSTM(FLAGS.seq_length, FLAGS.hidden_num, FLAGS.layer_num, FLAGS.class_num,
+        #                FLAGS.learning_rate, FLAGS.l2_reg_lambda)
+        # seq_length, class_num, filter_sizes, filters_num, embedding_size, learning_rate, l2_reg_lambda=0.0
+        model = GAN(FLAGS.seq_length, FLAGS.class_num, map(int, FLAGS.filter_sizes.split(',')), FLAGS.filters_num,
+                       FLAGS.embedding_size, FLAGS.learning_rate, FLAGS.l2_reg_lambda)
 
         train_writer = tf.summary.FileWriter(FLAGS.log_path + '/train', session.graph)
         merged = tf.summary.merge_all()
@@ -82,15 +89,20 @@ with tf.Graph().as_default():
         # training loop, for each batch
 
         for step in range(FLAGS.epochs_num):
-            sources_batch, targets_batch = utils.random_batch(sources, targets, None, FLAGS.batch_size)
+            sources_batch, targets_batch, scores_batch = utils.random_batch(sources, targets, scores, FLAGS.batch_size)
 
-            ops, feed_dict = model.train_step(sources_batch, targets_batch, FLAGS.keep_prob)
-            # shape1, shape2 = session.run(ops, feed_dict=feed_dict)
-            # print(shape1, shape2)
-            summaries, _, sim, loss = session.run([merged] + ops, feed_dict=feed_dict)
-            train_writer.add_summary(summaries, global_step=step + 1)
+            ops, feed_dict = model.discriminator_step(sources_batch, targets_batch, FLAGS.keep_prob)
 
-            print '--- training step %s --- loss: %.3f --- sim: %.3f ---' % (step + 1, loss, sim)
+            _, discriminator_loss, pearson = session.run(ops, feed_dict=feed_dict)
+
+            k = 5
+            generator_loss = 0
+            for i in range(k):
+                ops, feed_dict = model.generator_step(sources_batch, targets_batch, FLAGS.keep_prob)
+                _, temp_loss = session.run(ops, feed_dict=feed_dict)
+                generator_loss += temp_loss
+            print '--- training step %s --- discriminator_loss: %.3f --- generator_loss: %.3f --- pearson: %.3f' % \
+                  (step + 1, discriminator_loss, generator_loss / k, pearson)
 
 
 

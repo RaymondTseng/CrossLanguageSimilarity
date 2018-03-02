@@ -2,19 +2,24 @@ import pandas as pd
 import csv
 import word2vec
 import numpy as np
+import random
 import os
 
 def load_cross_lang_sentence_data(path):
     source_sentences = []
     target_sentences = []
+    scores = []
     f = open(path, 'r')
-    for line in f.readlines():
+    lines = f.readlines()
+    random.shuffle(lines)
+    for line in lines:
         line = line.strip()
         temp = line.split('\t')
         source_sentences.append(temp[0])
         target_sentences.append(temp[1])
+        scores.append(float(temp[2]))
     f.close()
-    return source_sentences, target_sentences
+    return source_sentences, target_sentences, scores
 
 def load_sick_data(path):
     df_sick = pd.read_csv(path, sep="\t", usecols=[1, 2, 4], names=['s1', 's2', 'score'],

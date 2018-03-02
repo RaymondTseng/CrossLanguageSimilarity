@@ -45,20 +45,16 @@ def load_word2idx(path):
 def random_batch(sources, targets, scores, batch_size):
     sources_batch = []
     targets_batch = []
-    if scores:
-        scores_batch = []
-        for _ in range(batch_size):
-            i = random.randint(0, len(sources) - 1)
-            sources_batch.append(sources[i])
-            targets_batch.append(targets[i])
-            scores_batch.append(scores[i])
-        return sources_batch, targets_batch, scores_batch
-    else:
-        for _ in range(batch_size):
-            i = random.randint(0, len(sources) - 1)
-            sources_batch.append(sources[i])
-            targets_batch.append(targets[i])
-        return sources_batch, targets_batch
+    scores_batch = []
+    for _ in range(batch_size):
+        i = random.randint(0, len(sources) - 1)
+        sources_batch.append(sources[i])
+        targets_batch.append(targets[i])
+        scores_batch.append(scores[i])
+    return sources_batch, targets_batch, scores_batch
+
+
+
 
 
 
