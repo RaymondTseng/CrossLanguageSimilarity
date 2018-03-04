@@ -21,7 +21,7 @@ save_path = '/home/raymond/Downloads/data/spanish.news.50d.model'
 #             sentences = tokenizer.tokenize(line)
 #             for sentence in sentences:
 #                 words = WordPunctTokenizer().tokenize(sentence)
-#                 all_words.append(words)
+#                 all_words.append([word.lower() for word in words])
 #         f.close()
 # for (root, dirs, files) in os.walk(others_path):
 #     for file_name in files:
@@ -32,7 +32,7 @@ save_path = '/home/raymond/Downloads/data/spanish.news.50d.model'
 #             sentences = tokenizer.tokenize(line)
 #             for sentence in sentences:
 #                 words = WordPunctTokenizer().tokenize(sentence)
-#                 all_words.append(words)
+#                 all_words.append([word.lower() for word in words])
 #         f.close()
 #
 # logging.basicConfig(format='%(asctime)s:%(levelname)s: %(message)s', level=logging.INFO)

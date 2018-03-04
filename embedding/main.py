@@ -71,7 +71,7 @@ with tf.Graph().as_default():
                                         initializer=tf.constant_initializer(source_word_embedding), trainable=True)
 
         with tf.variable_scope('target_embedding'):
-            target_embedding = tf.get_variable('target_embedding', shape=source_word_embedding.shape, dtype=tf.float32,
+            target_embedding = tf.get_variable('target_embedding', shape=target_word_embedding.shape, dtype=tf.float32,
                                         initializer=tf.constant_initializer(target_word_embedding), trainable=True)
 
         # model = BiLSTM(FLAGS.seq_length, FLAGS.hidden_num, FLAGS.layer_num, FLAGS.class_num,

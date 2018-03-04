@@ -56,3 +56,4 @@ def load_embedding(path):
     word_embedding = np.vstack([word_mean, word_embedding])
     return word2idx, word_embedding
 
+
