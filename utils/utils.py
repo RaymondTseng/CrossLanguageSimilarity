@@ -53,6 +53,34 @@ def random_batch(sources, targets, scores, batch_size):
         scores_batch.append(scores[i])
     return sources_batch, targets_batch, scores_batch
 
+# en = []
+# es = []
+# f = open('/home/raymond/Downloads/es-en/europarl-v7.es-en.en')
+# for line in f.readlines():
+#     es.append(line.strip())
+# f.close()
+#
+# f = open('/home/raymond/Downloads/es-en/europarl-v7.es-en.es')
+# for line in f.readlines():
+#     en.append(line.strip())
+# f.close()
+# f = open('/home/raymond/Downloads/es-en/europarl-v7.es-en.temp', 'w')
+#
+# for i, line in enumerate(en[:20000]):
+#     if line and es[i]:
+#         f.write(line + '|||' + es[i] + '|||1\n')
+# ten = en[20000:40000]
+# tes = es[20000:40000]
+# import random
+# random.shuffle(ten)
+# random.shuffle(tes)
+# for i, line in enumerate(ten):
+#     if line and es[i]:
+#         f.write(line + '|||' + tes[i] + '|||0\n')
+# f.close()
+
+
+
 
 
 
