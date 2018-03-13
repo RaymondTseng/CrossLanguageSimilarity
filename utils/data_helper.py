@@ -1,6 +1,5 @@
 import pandas as pd
 import csv
-import word2vec
 import numpy as np
 import random
 import os
@@ -47,7 +46,7 @@ def load_sick_data(path):
     return sources, targets, scores
 
 def load_sts_data(path):
-    csv_reader = csv.reader(open(path))
+    csv_reader = csv.reader(open(path, encoding='UTF-8'))
     scores = []
     sources = []
     targets = []
@@ -61,20 +60,29 @@ def load_sts_data(path):
     return sources, targets, scores
 
 def load_embedding(path, unk):
-    wv = word2vec.load(path)
-    vocab = wv.vocab
     word2idx = {}
-    word_embedding = wv.vectors
+    size = dimension = word_embeddings = None
+    f = open(path, 'r', encoding='UTF-8')
+    for i, line in enumerate(f.readlines()):
+        temp = line.strip().split(' ')
+        if i == 0:
+            assert len(temp) == 2
+            size = int(temp[0])
+            dimension = int(temp[1])
+            word_embeddings = np.zeros([size + 1, dimension], dtype=np.float64)
+        else:
+            assert len(temp) == dimension + 1
+            word2idx[temp[0]] = i
+            word_embeddings[i] = np.array(temp[1:], dtype=np.float64)
+    word2idx['<0>'] = 0
+    word_embeddings = np.vstack([np.zeros([dimension], dtype=np.float64), word_embeddings])
     if unk:
-        for i in range(1, len(vocab) + 1):
-            word2idx[vocab[i-1]] = i
-        word2idx['<unk>'] = 0
-        word_mean = np.mean(word_embedding, axis=0)
-        word_embedding = np.vstack([word_mean, word_embedding])
-    else:
-        for i in range(len(vocab)):
-            word2idx[vocab[i]] = i
-    return word2idx, word_embedding
+        word2idx['<unk>'] = len(word2idx)
+        word_mean = np.mean(word_embeddings, axis=0, keepdims=False)
+        word_embeddings = np.vstack([word_embeddings, word_mean])
+    return word2idx, word_embeddings
+
+
 
 
 
