@@ -53,6 +53,11 @@ print ("Loading data...")
 train_sources, train_targets, train_scores = data_helper.load_sts_data(FLAGS.train_path)
 dev_sources, dev_targets, dev_scores = data_helper.load_sts_data(FLAGS.dev_path)
 test_sources, test_targets, test_scores = data_helper.load_sts_data(FLAGS.test_path)
+
+train_source_features, train_target_features = utils.get_all_handcraft_features(train_sources, train_targets, FLAGS.seq_length)
+dev_source_features, dev_target_features = utils.get_all_handcraft_features(dev_sources, dev_targets, FLAGS.seq_length)
+test_source_features, test_target_features = utils.get_all_handcraft_features(test_sources, test_targets, FLAGS.seq_length)
+
 word2idx, word_embeddings = data_helper.load_embedding(FLAGS.embedding_path, True)
 train_sources = utils.word2id(train_sources, word2idx, FLAGS.seq_length)
 train_targets = utils.word2id(train_targets, word2idx, FLAGS.seq_length)
@@ -103,14 +108,15 @@ time_stamp = str(int(time.time()))
 
 with tf.Graph().as_default():
     config = tf.ConfigProto()
-    config.gpu_options.per_process_gpu_memory_fraction = 0.9  # 占用GPU90%的显存
+    # config.gpu_options.per_process_gpu_memory_fraction = 0.7  # 占用GPU70%的显存
+    config.gpu_options.allow_growth = True
     session = tf.Session(config=config)
     with session.as_default():
         # Define training procedure
 
         with tf.variable_scope('embedding'):
             embedding = tf.get_variable('embedding', shape=word_embeddings.shape, dtype=tf.float32,
-                                        initializer=tf.constant_initializer(word_embeddings), trainable=True)
+                                        initializer=tf.constant_initializer(word_embeddings), trainable=False)
 
         model = CNN(FLAGS.seq_length, FLAGS.class_num, list(map(int, FLAGS.filter_sizes.split(','))),
                     FLAGS.filters_num, FLAGS.embedding_size, FLAGS.learning_rate, FLAGS.l2_reg_lambda)
@@ -126,29 +132,27 @@ with tf.Graph().as_default():
         # training loop, for each batch
 
         for step in range(FLAGS.epochs_num):
-            sources_batch, targets_batch, scores_batch = utils.random_batch(train_sources, train_targets, train_scores,
-                                                                            FLAGS.batch_size)
+            sources_batch, targets_batch, scores_batch, source_features_batch, target_features_batch = \
+                utils.random_batch_with_handcraft(train_sources, train_targets, train_scores, train_source_features,
+                                        train_target_features, FLAGS.batch_size)
 
-            ops, feed_dict = model.train_step(sources_batch, targets_batch, scores_batch, FLAGS.keep_prob)
+            ops, feed_dict = model.train_step(sources_batch, targets_batch, scores_batch, source_features_batch,
+                                              target_features_batch, FLAGS.keep_prob)
             summaries, _, pearson, loss = session.run([merged] + ops, feed_dict=feed_dict)
             train_writer.add_summary(summaries, global_step=step + 1)
 
             print ('--- training step %s --- loss: %.3f --- pearson: %.3f ---' % (step + 1, loss, pearson))
 
             if (step + 1) % FLAGS.evaluate_every == 0:
-                ops, feed_dict = model.dev_step(dev_sources, dev_targets, dev_scores, 1.0)
+                ops, feed_dict = model.dev_step(dev_sources, dev_targets, dev_scores, dev_source_features, dev_target_features, 1.0)
                 summaries, pearson, loss = session.run([merged] + ops, feed_dict=feed_dict)
                 dev_writer.add_summary(summaries, global_step=step + 1)
 
                 print ('--- evaluation --- loss: %.3f --- pearson: %.3f ---' % (loss, pearson))
 
-        ops, feed_dict = model.dev_step(test_sources, test_targets, test_scores, 1.0)
+        ops, feed_dict = model.dev_step(test_sources, test_targets, test_scores, test_source_features, test_target_features, 1.0)
         pearson, loss = session.run(ops, feed_dict=feed_dict)
 
         print('--- test --- loss: %.3f --- pearson: %.3f ---' % (loss, pearson))
-            # if (step + 1) % FLAGS.save_every == 0:
-            #     path = os.path.join(FLAGS.save_path, 'model-' + str(step + 1))
-            #     saver.save(session, path)
-            #
-            #     print '--- save model --- model path: ' + path
+
 

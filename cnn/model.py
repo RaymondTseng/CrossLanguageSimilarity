@@ -21,6 +21,8 @@ class CNN:
         self.sources = tf.placeholder(tf.int32, [None, self.seq_length], name='sources')
         self.targets = tf.placeholder(tf.int32, [None, self.seq_length], name='targets')
         self.scores = tf.placeholder(tf.float32, [None], name='scores')
+        self.source_features = tf.placeholder(tf.float32, [None, self.seq_length, 39], name='source_features')
+        self.target_features = tf.placeholder(tf.float32, [None, self.seq_length, 39], name='target_features')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
         self.l2_loss = tf.constant(0.0)
@@ -30,6 +32,9 @@ class CNN:
             embedding = tf.get_variable('embedding')
             sources = tf.nn.embedding_lookup(embedding, self.sources)
             targets = tf.nn.embedding_lookup(embedding, self.targets)
+
+        sources = tf.concat([sources, self.source_features], axis=2)
+        targets = tf.concat([targets, self.target_features], axis=2)
 
         sources = tf.expand_dims(sources, -1)
         targets = tf.expand_dims(targets, -1)
@@ -82,7 +87,7 @@ class CNN:
             pooled_outputs = []
             for i, filter_size in enumerate(self.filter_sizes):
                 with tf.name_scope("conv-maxpool-%s" % filter_size):
-                    filter_shape = [filter_size, self.embedding_size, 1, self.filters_num]
+                    filter_shape = [filter_size, self.embedding_size + 39, 1, self.filters_num]
                     W = self.weight_variable(filter_shape)
                     b = self.bias_variable([self.filters_num])
                     conv = tf.nn.conv2d(x, W, [1, 1, 1, 1], padding='VALID')
@@ -96,22 +101,26 @@ class CNN:
         return h_pool_flat
 
 
-    def train_step(self, sources_batch, targets_batch, scores_batch, keep_prob):
+    def train_step(self, sources_batch, targets_batch, scores_batch, source_features, target_features, keep_prob):
         feed_dict = {}
         feed_dict[self.sources] = sources_batch
         feed_dict[self.targets] = targets_batch
         feed_dict[self.scores] = scores_batch
+        feed_dict[self.source_features] = source_features
+        feed_dict[self.target_features] = target_features
         feed_dict[self.keep_prob] = keep_prob
 
 
         return [self.optimizer, self.pearson, self.loss], feed_dict
 
 
-    def dev_step(self, sources_batch, targets_batch, scores_batch, keep_prob):
+    def dev_step(self, sources_batch, targets_batch, scores_batch, source_features, target_features, keep_prob):
         feed_dict = {}
         feed_dict[self.sources] = sources_batch
         feed_dict[self.targets] = targets_batch
         feed_dict[self.scores] = scores_batch
+        feed_dict[self.source_features] = source_features
+        feed_dict[self.target_features] = target_features
         feed_dict[self.keep_prob] = keep_prob
 
         return [self.pearson, self.loss], feed_dict
