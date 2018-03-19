@@ -115,7 +115,7 @@ class Word2Vec:
 
 
 class CrossLingualWord2Vec:
-    def __init__(self, sentences1, sentences2, size=50, learning_rate=0.001, window=5, min_count=10, batch_size=256,
+    def __init__(self, sentences1, sentences2, size=50, learning_rate=0.001, window=5, min_count=5, batch_size=128,
                  sample=1e-3, seed=1, epoch_num=1):
 
         assert len(sentences1) == len(sentences2)
@@ -238,12 +238,8 @@ class CrossLingualWord2Vec:
         f.close()
 
     def init_op(self):
-        config = tf.ConfigProto(device_count={"CPU": 4},  # limit to num_cpu_core CPU usage
-                                inter_op_parallelism_threads=1,
-                                intra_op_parallelism_threads=4,
-                                log_device_placement=True)
         self.init = tf.global_variables_initializer()
-        self.sess = tf.Session(config=config, graph=self.graph)
+        self.sess = tf.Session(graph=self.graph)
         self.writer = tf.summary.FileWriter('../log/' + self.name + self.time_stamp, self.sess.graph)
         self.merged = tf.summary.merge_all()
         self.saver = tf.train.Saver()
@@ -270,3 +266,4 @@ class CrossLingualWord2Vec:
             self.optimizer = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss)
 
             self.init_op()
+

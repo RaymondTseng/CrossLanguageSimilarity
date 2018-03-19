@@ -24,7 +24,7 @@ def word2id(sentences, word2idx, seq_length):
             print(sentence)
         if len(words) < seq_length:
             for _ in range(len(words), seq_length):
-                words.append('<unki>')
+                words.append('<unk>')
         elif len(words) > seq_length:
             words = words[:seq_length]
         id = list(map(get_id, words))
@@ -111,7 +111,50 @@ def get_all_handcraft_features(sources, targets, seq_length):
         all_target_features.append(target_features)
     return np.array(all_source_features), np.array(all_target_features)
 
-
+# es = open('/home/raymond/Downloads/es-en/europarl-v7.es-en.en', 'r').readlines()
+# en = open('/home/raymond/Downloads/es-en/europarl-v7.es-en.en', 'r').readlines()
+# lines = []
+# index_set = set()
+#
+# while (len(index_set) < 5000):
+#     index = random.randint(0, len(es) - 1)
+#     while (index in index_set):
+#         index = random.randint(0, len(es) - 1)
+#     words1 = es[index].strip().split(' ')
+#     words2 = en[index].strip().split(' ')
+#     if (2 < len(words1) < 45 and 2 < len(words2) < 45):
+#         lines.append(es[index].strip() + '\t' + en[index].strip() + '\t1\n')
+#         index_set.add(index)
+#
+# while (len(index_set) < 15000):
+#     index1 = random.randint(0, len(es) - 1)
+#     while (index1 in index_set):
+#         index1 = random.randint(0, len(es) - 1)
+#     index2 = random.randint(0, len(es) - 1)
+#     while (index2 in index_set):
+#         index2 = random.randint(0, len(es) - 1)
+#     if index1 == index2:
+#         continue
+#     words1 = es[index1].strip().split(' ')
+#     words2 = en[index2].strip().split(' ')
+#     if (2 < len(words1) < 45 and 2 < len(words2) < 45):
+#         lines.append(es[index1].strip() + '\t' + en[index2].strip() + '\t0\n')
+#         index_set.add(index1)
+#         index_set.add(index2)
+# np.random.shuffle(lines)
+#
+# f = open('/home/raymond/Downloads/es-en/cls-train.txt', 'w')
+# for line in lines[:8000]:
+#     f.write(line)
+# f.close()
+# f = open('/home/raymond/Downloads/es-en/cls-dev.txt', 'w')
+# for line in lines[8000:9000]:
+#     f.write(line)
+# f.close()
+# f = open('/home/raymond/Downloads/es-en/cls-test.txt', 'w')
+# for line in lines[9000:]:
+#     f.write(line)
+# f.close()
 
 
 

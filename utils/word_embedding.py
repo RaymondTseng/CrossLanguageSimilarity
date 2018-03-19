@@ -1,46 +1,32 @@
 from gensim.models import word2vec
 import os
 from nltk.tokenize import WordPunctTokenizer
-import nltk.data
 import logging
 
-tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
-news_path = '/home/raymond/Downloads/spanish_news/'
-others_path = '/home/raymond/Downloads/spanish_others/'
-save_path = '/home/raymond/Downloads/data/spanish.news.50d.model'
 
-# all_words = []
+
+
+# en_sentences = []
 #
-# for (root, dirs, files) in os.walk(news_path):
-#     for file_name in files:
-#         file_name = os.path.join(root, file_name)
-#         f = open(file_name, 'r')
-#         for line in f.readlines():
-#             line = line.strip().decode('utf-8')
-#             sentences = tokenizer.tokenize(line)
-#             for sentence in sentences:
-#                 words = WordPunctTokenizer().tokenize(sentence)
-#                 all_words.append([word.lower() for word in words])
-#         f.close()
-# for (root, dirs, files) in os.walk(others_path):
-#     for file_name in files:
-#         file_name = os.path.join(root, file_name)
-#         f = open(file_name, 'r')
-#         for line in f.readlines():
-#             line = line.strip().decode('utf-8')
-#             sentences = tokenizer.tokenize(line)
-#             for sentence in sentences:
-#                 words = WordPunctTokenizer().tokenize(sentence)
-#                 all_words.append([word.lower() for word in words])
-#         f.close()
+# print 'loading data...'
+# en = open('/home/raymond/Downloads/es-en/europarl-v7.es-en.en', 'r').readlines()
+#
+# for i, line1 in enumerate(en):
+#     line1 = line1.strip()
+#
+#     if line1:
+#         words1 = WordPunctTokenizer().tokenize(line1)
+#
+#         if len(words1) > 1:
+#             en_sentences.append([word.lower() for word in words1])
 #
 # logging.basicConfig(format='%(asctime)s:%(levelname)s: %(message)s', level=logging.INFO)
-# model = word2vec.Word2Vec(all_words, size=50)
-# model.save(save_path)
+# model = word2vec.Word2Vec(en_sentences, size=50)
+# model.save('/home/raymond/Downloads/es-en/model.en.50')
 
-model = word2vec.Word2Vec.load(save_path)
-
+model = word2vec.Word2Vec.load('/home/raymond/Downloads/data/spanish.news.50d.model')
+model.train()
 f = open('/home/raymond/Downloads/data/spanish.news.50d.txt', 'w')
 f.write(str(len(model.wv.index2word)) + ' ' + str(model.wv.vector_size) + '\n')
 for i, word in enumerate(model.wv.index2word):

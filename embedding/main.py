@@ -6,8 +6,8 @@ from nltk.tokenize import WordPunctTokenizer
 en_sentences = []
 es_sentences = []
 print 'loading data...'
-en = open('/home/raymond/Downloads/es-en/europarl-v7.es-en.en', 'r').readlines()
-es = open('/home/raymond/Downloads/es-en/europarl-v7.es-en.es', 'r').readlines()
+en = open('/home/raymond/Downloads/es-en/europarl-v7.es-en.en.small', 'r').readlines()
+es = open('/home/raymond/Downloads/es-en/europarl-v7.es-en.es.small', 'r').readlines()
 for i, line1 in enumerate(en):
     line1 = line1.strip()
     line2 = es[i].strip()
@@ -22,4 +22,7 @@ print 'build model...'
 
 model = CrossLingualWord2Vec(en_sentences, es_sentences)
 model.save('model.en-es')
+
+
+
 
