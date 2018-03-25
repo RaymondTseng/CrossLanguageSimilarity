@@ -2,49 +2,45 @@
 
 import tensorflow as tf
 from utils import utils, data_helper
-from model import CNN
+from model import LSTM
+import numpy as np
 import time
-import os
 from functools import reduce
 from operator import mul
 
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
-
-
 
 # Model Hyper Parameters
-tf.flags.DEFINE_integer('filters_num', 300, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 30, 'sequence length (default 36)')
+tf.flags.DEFINE_integer('hidden_size', 300, 'hidden size in LSTM layer (default: 128)')
+tf.flags.DEFINE_integer('seq_length', 20, 'sequence length (default 36)')
 tf.flags.DEFINE_integer('class_num', 6, 'classes number (default 1)')
+tf.flags.DEFINE_integer('layer_num', 1, 'Number of BiLSTM layer (default: 1)')
 tf.flags.DEFINE_integer('embedding_size', 300, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '2,3,4', 'Comma-separated filter sizes (default: "3,4,5")')
 tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0., "L2 regularization lambda (default: 0.0)")
+tf.flags.DEFINE_float("l2_reg_lambda", 1e-3, "L2 regularization lambda (default: 0.0)")
 
 # Data Parameters
 tf.flags.DEFINE_string('train_path', '/home/raymond/Downloads/data/sts-train.csv', 'train set')
 tf.flags.DEFINE_string('dev_path', '/home/raymond/Downloads/data/sts-dev.csv', 'dev set')
 tf.flags.DEFINE_string('test_path', '/home/raymond/Downloads/data/sts-test.csv', 'test set')
 tf.flags.DEFINE_string('embedding_path', '/home/raymond/Downloads/data/glove.6B.300d.txt', 'word embedding source')
-tf.flags.DEFINE_string('save_path', '../save/', 'save model')
-tf.flags.DEFINE_string('log_path', '../log/', 'log training data')
+tf.flags.DEFINE_string('save_path', '../save', 'save model')
+tf.flags.DEFINE_string('log_path', '../log', 'log training data')
 tf.flags.DEFINE_float("train_sample_percentage", .8, "Percentage of the training data to use for validation")
 
 # Training Parameters
-tf.flags.DEFINE_integer("batch_size", 32, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 30000, "Number of training epochs (default: 20000)")
+tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
+tf.flags.DEFINE_integer("epochs_num", 20000, "Number of training epochs (default: 20000)")
 tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
+tf.flags.DEFINE_float('learning_rate', 0.01, 'Learning rate')
 
 
 FLAGS = tf.flags.FLAGS
-# FLAGS = FLAGS._parse_args()
-# print("\nParameters:")
-# for attr, value in sorted(FLAGS.__flags.items()):
-#     print("{}={}".format(attr.upper(), value))
-# print("")
+FLAGS._parse_flags()
+print "\nParameters:"
+for attr, value in sorted(FLAGS.__flags.items()):
+    print("{}={}".format(attr.upper(), value))
+print ""
 
 
 # Data Preparation
@@ -73,6 +69,7 @@ test_score_probs = utils.build_porbs(test_scores, FLAGS.class_num)
 
 
 
+
 print("Train/Dev split: {:d}/{:d}".format(len(train_scores), len(dev_scores)))
 
 time_stamp = str(int(time.time()))
@@ -91,8 +88,8 @@ with tf.Graph().as_default():
             embedding = tf.get_variable('embedding', shape=word_embeddings.shape, dtype=tf.float32,
                                         initializer=tf.constant_initializer(word_embeddings), trainable=False)
 
-        model = CNN(FLAGS.seq_length, FLAGS.class_num, list(map(int, FLAGS.filter_sizes.split(','))),
-                    FLAGS.filters_num, FLAGS.embedding_size, FLAGS.learning_rate, FLAGS.l2_reg_lambda)
+        model = LSTM(FLAGS.seq_length, FLAGS.hidden_size, FLAGS.layer_num, FLAGS.class_num,
+                        FLAGS.learning_rate, FLAGS.l2_reg_lambda)
 
         num_params = 0
         for variable in tf.trainable_variables():
@@ -128,7 +125,7 @@ with tf.Graph().as_default():
             print ('--- training step %s --- pearson: %.3f --- loss: %.3f ---' % (step + 1, pearson, loss))
 
             if (step + 1) % FLAGS.evaluate_every == 0:
-                ops, feed_dict = model.dev_step(dev_sources, dev_targets, dev_score_probs, 1.0)
+                ops, feed_dict = model.dev_step(dev_sources, dev_targets, dev_score_probs)
                 scores, loss = session.run(ops, feed_dict=feed_dict)
                 pearson = utils.pearson(scores, dev_scores)
 
@@ -136,9 +133,7 @@ with tf.Graph().as_default():
                 print ('--- evaluation --- pearson: %.3f --- loss: %.3f ---' % (pearson, loss))
 
 
-        ops, feed_dict = model.dev_step(test_sources, test_targets, test_score_probs, 1.0)
+        ops, feed_dict = model.dev_step(test_sources, test_targets, test_score_probs)
         scores, loss = session.run(ops, feed_dict=feed_dict)
         pearson = utils.pearson(scores, test_scores)
         print('--- test --- pearson: %.3f --- loss: %.3f ---' % (pearson, loss))
-
-

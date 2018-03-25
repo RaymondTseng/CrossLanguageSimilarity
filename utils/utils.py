@@ -1,16 +1,18 @@
+# -*- coding:utf-8 -*-
 import random
 from nltk.tokenize import WordPunctTokenizer
 import nltk
 import numpy as np
-import string
+import re
+punc = u"[\s+\.\!\/_,\-\?$%^*()+\"\']+|[+——！，。？、~@#￥%……&*（）]+"
 
 nltk_pos_set = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNP', 'MNPS', 'NNS', 'PDT',
                 'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG', 'VBN', 'VBP',
                 'VBZ', 'WDT', 'WP', 'WP$', 'WRB', '.']
 
 def get_id(word):
-    word = word.lower()
-    return word2idx_.get(word, word2idx_['<unk>'])
+    word = word.strip().lower()
+    return word2idx_.get(word, word2idx_['<0>'])
 
 
 def word2id(sentences, word2idx, seq_length):
@@ -19,17 +21,19 @@ def word2id(sentences, word2idx, seq_length):
     word2idx_ = word2idx
     for sentence in sentences:
         try:
+            sentence = sentence.strip().decode('utf-8')
+            sentence = re.sub(punc, u' ', sentence).strip()
             words = WordPunctTokenizer().tokenize(sentence)
         except:
             print(sentence)
         if len(words) < seq_length:
             for _ in range(len(words), seq_length):
-                words.append('<unk>')
+                words.append('<0>')
         elif len(words) > seq_length:
             words = words[:seq_length]
         id = list(map(get_id, words))
         idx.append(id)
-    return idx
+    return np.array(idx)
 
 def load_word2idx(path):
     word2idx = {}
@@ -45,8 +49,12 @@ def random_batch(sources, targets, scores, batch_size):
     sources_batch = []
     targets_batch = []
     scores_batch = []
+    index_set = set()
     for _ in range(batch_size):
         i = random.randint(0, len(sources) - 1)
+        while i in index_set:
+            i = random.randint(0, len(sources) - 1)
+        index_set.add(i)
         sources_batch.append(sources[i])
         targets_batch.append(targets[i])
         scores_batch.append(scores[i])
@@ -111,50 +119,43 @@ def get_all_handcraft_features(sources, targets, seq_length):
         all_target_features.append(target_features)
     return np.array(all_source_features), np.array(all_target_features)
 
-# es = open('/home/raymond/Downloads/es-en/europarl-v7.es-en.en', 'r').readlines()
-# en = open('/home/raymond/Downloads/es-en/europarl-v7.es-en.en', 'r').readlines()
+def build_porbs(scores, class_num):
+    probs = []
+    for score in scores:
+        score_floor = int(np.floor(score))
+        prob = np.zeros(class_num)
+        prob[score_floor] = score_floor - score + 1
+        if score_floor + 1 < class_num:
+            prob[score_floor + 1] = score - score_floor
+        prob = np.clip(prob, 1e-6, 1.)
+        probs.append(prob)
+    return np.array(probs)
+
+def pearson(x1, x2):
+    mid1 = np.mean(x1 * x2) - \
+           np.mean(x1) * np.mean(x2)
+
+    mid2 = np.sqrt(np.mean(np.square(x1)) - np.square(np.mean(x1))) * \
+           np.sqrt(np.mean(np.square(x2)) - np.square(np.mean(x2)))
+
+    pearson = mid1 / mid2
+
+    return pearson
+
+
+# path = '/home/raymond/Downloads/all_cross-lingual_data/STS.input.track4b.es-en.txt'
 # lines = []
-# index_set = set()
-#
-# while (len(index_set) < 5000):
-#     index = random.randint(0, len(es) - 1)
-#     while (index in index_set):
-#         index = random.randint(0, len(es) - 1)
-#     words1 = es[index].strip().split(' ')
-#     words2 = en[index].strip().split(' ')
-#     if (2 < len(words1) < 45 and 2 < len(words2) < 45):
-#         lines.append(es[index].strip() + '\t' + en[index].strip() + '\t1\n')
-#         index_set.add(index)
-#
-# while (len(index_set) < 15000):
-#     index1 = random.randint(0, len(es) - 1)
-#     while (index1 in index_set):
-#         index1 = random.randint(0, len(es) - 1)
-#     index2 = random.randint(0, len(es) - 1)
-#     while (index2 in index_set):
-#         index2 = random.randint(0, len(es) - 1)
-#     if index1 == index2:
-#         continue
-#     words1 = es[index1].strip().split(' ')
-#     words2 = en[index2].strip().split(' ')
-#     if (2 < len(words1) < 45 and 2 < len(words2) < 45):
-#         lines.append(es[index1].strip() + '\t' + en[index2].strip() + '\t0\n')
-#         index_set.add(index1)
-#         index_set.add(index2)
-# np.random.shuffle(lines)
-#
-# f = open('/home/raymond/Downloads/es-en/cls-train.txt', 'w')
-# for line in lines[:8000]:
-#     f.write(line)
+# f = open(path, 'r')
+# for line in f.readlines():
+#     temp = line.strip().split('\t')
+#     lines.append(temp[1] + '\t' + temp[0] + '\t')
 # f.close()
-# f = open('/home/raymond/Downloads/es-en/cls-dev.txt', 'w')
-# for line in lines[8000:9000]:
-#     f.write(line)
+# scores = open('/home/raymond/Downloads/all_cross-lingual_data/STS.gs.track4b.es-en.txt', 'r').readlines()
+# f = open('/home/raymond/Downloads/all_cross-lingual_data/STS.dev.b.es-en', 'w')
+# for i, line in enumerate(lines):
+#     f.write(line + scores[i])
 # f.close()
-# f = open('/home/raymond/Downloads/es-en/cls-test.txt', 'w')
-# for line in lines[9000:]:
-#     f.write(line)
-# f.close()
+
 
 
 

@@ -1,791 +1,166 @@
-cls-train.txt/18000
-cls-dev.txt/1500
-cls-test.txt/500
-pearson, accuracy
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-dev={pearson:0.883, accuracy:0.845}  test={pearson:0.908, accuracy:0.857}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '1,2,3', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-dev={pearson:0.858, accuracy:0.821}  test={pearson:0.885, accuracy:0.835}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5,6,7', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-dev={pearson:0.903, accuracy:0.864}  test={pearson:0.926, accuracy:0.874}
--------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '1,2,3,4,5,6,7,8,9', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-dev={pearson:0.917, accuracy:0.877}  test={pearson:0.938, accuracy:0.886}
--------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 64, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-dev={pearson:0.865, accuracy:0.829}  test={pearson:0.893, accuracy:0.843}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 256, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-dev={pearson:0.902, accuracy:0.857}  test={pearson:0.924, accuracy:0.868}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 384, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-dev={pearson:0.909, accuracy:0.867}  test={pearson:0.930, accuracy:0.877}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 128, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-dev={pearson:0.897, accuracy:0.856}  test={pearson:0.920, accuracy:0.868}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 256, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-dev={pearson:0.909, accuracy:0.868}  test={pearson:0.932, accuracy:0.880}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-dev={pearson:0.940, accuracy:0.915}  test={pearson:0.960, accuracy:0.923}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 30000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-dev={pearson:0.952, accuracy:0.933}  test={pearson:0.971, accuracy:0.943}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 100000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-dev={pearson:0.962, accuracy:0.952}  test={pearson:0.979, accuracy:0.961}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 200000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-dev={pearson:0.964, accuracy:0.960}  test={pearson:0.981, accuracy:0.970}
---------------------------------------------------------------------------------------------------
-
-
-cls-train.txt/8000
-cls-dev.txt/1000
-cls-test.txt/1000
-pearson, accuracy
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-dev={pearson:0.948, accuracy:0.913}  test={pearson:0.940, accuracy:0.907}
---------------------------------------------------------------------------------------------------
-
-cls-train.txt/4000
-cls-dev.txt/1000
-cls-test.txt/1000
-pearson, accuracy
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-dev={pearson:0.944, accuracy:0.906}  test={pearson:0.934, accuracy:0.900}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('hidden_size', 128, 'the number of hidden units (default 128)')
-tf.flags.DEFINE_integer('layer_num', 1, 'the number of hidden layer (default 1)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-dev={pearson:0.844, accuracy:0.872}  test={pearson:0.846, accuracy:0.871}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-gradient = [-1, 1]
-
-dev={pearson:0.943, accuracy:0.902}  test={pearson:0.935, accuracy:0.897}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-gradient = [-2, 2]
-
-dev={pearson:0.946, accuracy:0.913}  test={pearson:0.934, accuracy:0.908}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-gradient = [-3, 3]
-
-dev={pearson:0.945, accuracy:0.904}  test={pearson:0.936, accuracy:0.896}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-gradient = [-2, 2]
-loss = cross entropy
-
-dev={pearson:0.951, accuracy:0.942}  test={pearson:0.941, accuracy:0.937}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-tf.flags.DEFINE_integer('hidden_size', 128, 'the number of hidden units (default 128)')
-tf.flags.DEFINE_integer('layer_num', 1, 'the number of hidden layer (default 1)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-gradient = [-2, 2]
-loss = cross entropy
-
-dev={pearson:0.828, accuracy:0.891}  test={pearson:0.830, accuracy:0.888}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-BiLSTM
-tf.flags.DEFINE_integer('hidden_size', 128, 'the number of hidden units (default 128)')
-tf.flags.DEFINE_integer('layer_num', 1, 'the number of hidden layer (default 1)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-loss = cross entropy
-concat
-
-dev={pearson:0.759, accuracy:0.852}  test={pearson:0.724, accuracy:0.836}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-BiLSTM
-tf.flags.DEFINE_integer('hidden_size', 128, 'the number of hidden units (default 128)')
-tf.flags.DEFINE_integer('layer_num', 1, 'the number of hidden layer (default 1)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-loss = cross entropy
-
-dev={pearson:0.783, accuracy:0.861}  test={pearson:0.770, accuracy:0.855}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-RNN
-tf.flags.DEFINE_integer('hidden_size', 128, 'the number of hidden units (default 128)')
-tf.flags.DEFINE_integer('layer_num', 1, 'the number of hidden layer (default 1)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-loss = cross entropy
-
-dev={pearson:0.863, accuracy:0.862}  test={pearson:0.875, accuracy:0.863}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-GRU
-tf.flags.DEFINE_integer('hidden_size', 128, 'the number of hidden units (default 128)')
-tf.flags.DEFINE_integer('layer_num', 1, 'the number of hidden layer (default 1)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-loss = cross entropy
-
-dev={pearson:0.890, accuracy:0.916}  test={pearson:0.879, accuracy:0.909}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-rnnattention
-tf.flags.DEFINE_integer('hidden_size', 128, 'the number of hidden units (default 128)')
-tf.flags.DEFINE_integer('layer_num', 1, 'the number of hidden layer (default 1)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-gradient = [-1, 1]
-loss = cross entropy
-
-dev={pearson:0.784, accuracy:0.799}  test={pearson:0.777, accuracy:0.793}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-rnnattention
-tf.flags.DEFINE_integer('hidden_size', 128, 'the number of hidden units (default 128)')
-tf.flags.DEFINE_integer('layer_num', 1, 'the number of hidden layer (default 1)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-gradient = [-1, 1]
-loss = cross entropy
-
-dev={pearson:0.799, accuracy:0.888}  test={pearson:0.806, accuracy:0.887}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-rnnattention
-tf.flags.DEFINE_integer('hidden_size', 128, 'the number of hidden units (default 128)')
-tf.flags.DEFINE_integer('layer_num', 1, 'the number of hidden layer (default 1)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-gradient = [-2, 2]
-loss = cross entropy
-
-dev={pearson:0.844, accuracy:0.911}  test={pearson:0.826, accuracy:0.901}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-gruattention
-tf.flags.DEFINE_integer('hidden_size', 128, 'the number of hidden units (default 128)')
-tf.flags.DEFINE_integer('layer_num', 1, 'the number of hidden layer (default 1)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-gradient = [-2, 2]
-loss = cross entropy
-
-dev={pearson:0.884, accuracy:0.917}  test={pearson:0.867, accuracy:0.907}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-gruattention
-tf.flags.DEFINE_integer('hidden_size', 128, 'the number of hidden units (default 128)')
-tf.flags.DEFINE_integer('layer_num', 1, 'the number of hidden layer (default 1)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-loss = cross entropy
-
-dev={pearson:0.844, accuracy:0.911}  test={pearson:0.826, accuracy:0.901}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-lstmattention
-tf.flags.DEFINE_integer('hidden_size', 128, 'the number of hidden units (default 128)')
-tf.flags.DEFINE_integer('layer_num', 1, 'the number of hidden layer (default 1)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-gradient = [-2, 2]
-loss = cross entropy
-
-dev={pearson:0.900, accuracy:0.927}  test={pearson:0.872, accuracy:0.910}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-bilstmattention
-tf.flags.DEFINE_integer('hidden_size', 128, 'the number of hidden units (default 128)')
-tf.flags.DEFINE_integer('layer_num', 1, 'the number of hidden layer (default 1)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-gradient = [-2, 2]
-loss = cross entropy
-
-dev={pearson:0.930, accuracy:0.954}  test={pearson:0.898, accuracy:0.936}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-CNNAttention
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'Learning rate')
-
-gradient = [-2, 2]
-loss = cross entropy
-
-dev={pearson:0.873, accuracy:0.863}  test={pearson:0.862, accuracy:0.858}
---------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------
-CNNAttention
-tf.flags.DEFINE_integer('filters_num', 128, 'Number of filters per filter size (default: 128)')
-tf.flags.DEFINE_integer('seq_length', 36, 'sequence length (default 36)')
-tf.flags.DEFINE_integer('class_num', 1, 'classes number (default 1)')
-tf.flags.DEFINE_integer('embedding_size', 50, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '3,4,5', 'Comma-separated filter sizes (default: "3,4,5")')
-tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
-
-tf.flags.DEFINE_string('source_embedding_path', '/home/raymond/Downloads/data/spanish.news.50d.txt', 'source word embedding')
-tf.flags.DEFINE_string('target_embedding_path', '/home/raymond/Downloads/data/glove.6B.50d.txt', 'target word embedding')
-
-tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 10000, "Number of training epochs (default: 20000)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("save_every", 5000, "Save model after this many steps (default: 5000)")
-tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
-
-gradient = [-2, 2]
-loss = cross entropy
-
-dev={pearson:0.821, accuracy:0.878}  test={pearson:0.814, accuracy:0.871}
---------------------------------------------------------------------------------------------------
+------------------------
+seq_length = 30
+class_num = 6
+embedding_size = 100
+filter_sizes = [1, 2, 3]
+filter_num = 100
+batch_size = 32
+epochs_num = 32
+
+dev: 0.3388  test: 0.1024
+------------------------
+
+------------------------
+seq_length = 30
+class_num = 6
+embedding_size = 100
+filter_sizes = [1, 2, 3, 4, 5]
+filter_num = 100
+batch_size = 32
+epochs_num = 32
+
+dev: 0.3568  test: 0.1721
+------------------------
+
+------------------------
+seq_length = 30
+class_num = 6
+embedding_size = 100
+filter_sizes = [1, 2, 3]
+filter_num = 200
+batch_size = 32
+epochs_num = 32
+
+dev: 0.3598  test: 0.1357
+------------------------
+
+------------------------
+seq_length = 30
+class_num = 6
+embedding_size = 100
+filter_sizes = [1, 2, 3]
+filter_num = 300
+batch_size = 32
+epochs_num = 32
+
+dev: 0.3898  test: 0.1078
+------------------------
+
+------------------------
+seq_length = 20
+class_num = 6
+embedding_size = 100
+filter_sizes = [1, 2, 3]
+filter_num = 100
+batch_size = 32
+epochs_num = 32
+
+dev: 0.3905  test: 0.1536
+------------------------
+
+------------------------
+seq_length = 20
+class_num = 6
+embedding_size = 100
+filter_sizes = [1, 2, 3]
+filter_num = 100
+batch_size = 32
+epochs_num = 32
+
+dev: 0.3905  test: 0.1536
+------------------------
+
+------------------------
+seq_length = 20
+class_num = 6
+embedding_size = 100
+filter_sizes = [1, 2, 3]
+filter_num = 100
+batch_size = 32
+epochs_num = 32
+regularizer_rate = 0.004
+
+dev: 0.3501  test: 0.1564
+------------------------
+
+------------------------
+seq_length = 20
+class_num = 6
+embedding_size = 100
+filter_sizes = [1, 2, 3]
+filter_num = 100
+batch_size = 64
+epochs_num = 64
+drop_out_rate = 0.5 (sdv)
+
+dev: 0.4163  test: 0.2066
+------------------------
+
+------------------------
+seq_length = 20
+class_num = 6
+embedding_size = 100
+filter_sizes = [1, 2, 3]
+filter_num = 300
+batch_size = 64
+epochs_num = 64
+drop_out_rate = 0.5 (output1)
+
+dev: 0.3815  test: 0.1425
+------------------------
+
+------------------------
+seq_length = 20
+class_num = 6
+embedding_size = 100
+filter_sizes = [1, 2, 3]
+filter_num = 100
+batch_size = 64
+epochs_num = 128
+drop_out_rate = 0.8 (sdv)
+
+dev: 0.4288  test: 0.1889
+------------------------
+
+------------------------
+seq_length = 20
+class_num = 6
+embedding_size = 100
+filter_sizes = [1, 2, 3]
+filter_num = 100
+batch_size = 64
+epochs_num = 64
+drop_out_rate = 0.2 (sdv)
+
+dev: 0.4011  test: 0.1773
+------------------------
+abs(sub) + add - mul matrix
+cnn  dev_max : 0.5233
+
+
+
+
+lstm
+------------------------
+seq_length = 20
+class_num = 6
+embedding_size = 100
+hidden_size = 100
+batch_size = 64
+epochs_num = 128
+
+dev: 0.2451  test: 0.0504
+------------------------
+bilstm
+------------------------
+seq_length = 20
+class_num = 6
+embedding_size = 100
+hidden_size = 100
+batch_size = 64
+epochs_num = 128
+
+dev: 0.2504  test: 0.0661
+------------------------
 
 

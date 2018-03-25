@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 import pandas as pd
 import csv
 import word2vec
@@ -47,30 +48,29 @@ def load_sick_data(path):
     return sources, targets, scores
 
 def load_sts_data(path):
-    csv_reader = csv.reader(open(path))
+    lines = open(path).readlines()
     scores = []
     sources = []
     targets = []
-    for row in csv_reader:
-        temp = row[0].split('\t')
-        if len(temp) >= 7:
-            scores.append(float(temp[4]))
-            sources.append(temp[5])
-            targets.append(temp[6])
+    for line in lines:
+        temp = line.strip().split('\t')
+        scores.append(float(temp[4]))
+        sources.append(temp[5])
+        targets.append(temp[6])
 
     return sources, targets, scores
 
-def load_embedding(path, unk):
+def load_embedding(path, zero):
     wv = word2vec.load(path)
     vocab = wv.vocab
     word2idx = {}
     word_embedding = wv.vectors
-    if unk:
+    if zero:
         for i in range(1, len(vocab) + 1):
             word2idx[vocab[i-1]] = i
-        word2idx['<unk>'] = 0
-        word_mean = np.mean(word_embedding, axis=0)
-        word_embedding = np.vstack([word_mean, word_embedding])
+        word2idx['<0>'] = 0
+        word_zero = np.zeros(len(word_embedding[0]))
+        word_embedding = np.vstack([word_zero, word_embedding])
     else:
         for i in range(len(vocab)):
             word2idx[vocab[i]] = i
