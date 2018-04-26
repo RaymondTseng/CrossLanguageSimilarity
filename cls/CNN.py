@@ -1,6 +1,14 @@
 import tensorflow as tf
 import numpy as np
-class CNN:
+
+
+def LeakyRelu(x, leak=0.2, name="LeakyRelu"):
+    with tf.variable_scope(name):
+        f1 = 0.5 * (1 + leak)
+        f2 = 0.5 * (1 - leak)
+        return f1 * x + f2 * tf.abs(x)
+
+class CNN_PROB:
     def __init__(self, seq_length, class_num, filter_sizes, filters_num,
                  embedding_size, learning_rate, l2_reg_lambda=0.0):
         self.name = 'cnn'
@@ -18,7 +26,7 @@ class CNN:
         self.sources = tf.placeholder(tf.int32, [None, self.seq_length], name='sources')
         self.targets = tf.placeholder(tf.int32, [None, self.seq_length], name='targets')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
-        self.scores = tf.placeholder(tf.float32, [None], name='scores')
+        self.scores_prob = tf.placeholder(tf.float32, [None, self.class_num], name='scores')
 
         self.l2_loss = tf.constant(0.0)
 
@@ -30,122 +38,116 @@ class CNN:
         with tf.variable_scope('target_embedding', reuse=True):
             target_embedding = tf.get_variable('target_embedding')
             targets = tf.nn.embedding_lookup(target_embedding, self.targets)
+        with tf.name_scope('convolution'):
+            source_outputs = self.convolution(sources)
+            target_outputs = self.convolution(targets, True)
+            self.all_filter_num = len(self.filter_sizes) * self.filters_num
 
-        sources = tf.expand_dims(sources, -1)
-        targets = tf.expand_dims(targets, -1)
+        with tf.name_scope('operation'):
+            source_conc = tf.concat(source_outputs, axis=-1)
+            target_conc = tf.concat(target_outputs, axis=-1)
 
+            h_sub = tf.abs(source_conc - target_conc)
+            h_add = source_conc + target_conc
+            h_mul = source_conc * target_conc
 
-        self.all_num_filters = self.filters_num * len(self.filter_sizes)
-        sources = self.convolution(sources)
-        targets = self.convolution(targets)
+            w1 = self.weight_varible([self.all_filter_num, self.all_filter_num])
+            b1 = self.weight_varible([self.all_filter_num])
 
-        sdv = tf.concat([tf.abs(sources - targets), sources * targets], axis=1)
-        # sdv = tf.concat([sources, targets], axis=1)
+            w2 = self.weight_varible([self.all_filter_num, self.all_filter_num])
+            b2 = self.weight_varible([self.all_filter_num])
+
+            w3 = self.weight_varible([self.all_filter_num, self.all_filter_num])
+            b3 = self.weight_varible([self.all_filter_num])
+
+            sdv = tf.matmul(h_sub, w1) + b1 + tf.matmul(h_add, w2) + b2 - (tf.matmul(h_mul, w3) + b3)
 
         with tf.name_scope('drop_out'):
-            h_drop = tf.nn.dropout(sdv, self.keep_prob)
-
+            sdv = tf.nn.dropout(sdv, self.keep_prob)
 
         with tf.name_scope('output'):
-            W = self.weight_variable([2 * self.all_num_filters, self.class_num])
-            b = self.bias_variable([self.class_num])
-            self.l2_loss += tf.nn.l2_loss(W)
-            self.l2_loss += tf.nn.l2_loss(b)
-            # self.logits = tf.sigmoid(tf.matmul(h_drop, W) + b)
-            self.logits = tf.matmul(h_drop, W) + b
+            w = self.weight_varible([self.all_filter_num, self.class_num])
+            b = self.weight_varible([self.class_num])
 
-            # self.logits = tf.matmul(tf.nn.softmax(self.logits), tf.reshape(tf.range(self.class_num, dtype=tf.float32), [self.class_num, -1]))
-
-            self.logits = tf.reshape(self.logits, [-1])
+            self.logits = tf.nn.softmax(tf.matmul(sdv, w) + b)
 
         with tf.name_scope('loss'):
-            losses = tf.nn.sigmoid_cross_entropy_with_logits(labels=self.scores, logits=self.logits)
-            # losses = tf.square(self.logits - self.scores)
-            self.loss = tf.reduce_mean(losses) + self.l2_reg_lambda * self.l2_loss
-            tf.summary.scalar('loss', self.loss)
-
-        self.logits = tf.sigmoid(self.logits)
+            scores = tf.clip_by_value(self.scores_prob, 1e-7, 1.)
+            logits = tf.clip_by_value(self.logits, 1e-7, 1.)
+            avg_distance = (tf.reduce_sum(scores * tf.log(scores / logits), axis=1) +
+                            tf.reduce_sum(logits * tf.log(logits / scores), axis=1)) / 2.
+            self.loss = tf.reduce_mean(avg_distance)
 
         with tf.name_scope('pearson'):
-            mid1 = tf.reduce_mean(self.logits * self.scores) - \
-                   tf.reduce_mean(self.logits) * tf.reduce_mean(self.scores)
+            norm_scores = tf.reshape(tf.range(self.class_num, dtype=tf.float32), [self.class_num, 1])
+            true_scores = tf.reshape(tf.matmul(self.scores_prob, norm_scores), [-1])
+            pred_scores = tf.reshape(tf.matmul(self.logits, norm_scores), [-1])
 
-            mid2 = tf.sqrt(tf.reduce_mean(tf.square(self.logits)) - tf.square(tf.reduce_mean(self.logits))) * \
-                   tf.sqrt(tf.reduce_mean(tf.square(self.scores)) - tf.square(tf.reduce_mean(self.scores)))
+            mid1 = tf.reduce_mean(true_scores * pred_scores) - \
+                   tf.reduce_mean(true_scores) * tf.reduce_mean(pred_scores)
+
+            mid2 = tf.sqrt(tf.reduce_mean(tf.square(true_scores)) - tf.square(tf.reduce_mean(true_scores))) * \
+                   tf.sqrt(tf.reduce_mean(tf.square(pred_scores)) - tf.square(tf.reduce_mean(pred_scores)))
 
             self.pearson = mid1 / mid2
-            tf.summary.scalar('pearson', self.pearson)
-
-        with tf.name_scope('accuracy'):
-            self.accuracy = 1 - tf.reduce_mean(tf.abs(self.logits - self.scores))
-            tf.summary.scalar('accuracy', self.accuracy)
 
 
-
-        with tf.name_scope('training'):
-            optimizer = tf.train.AdamOptimizer(self.learning_rate)
-            gvs = optimizer.compute_gradients(self.loss)
-            capped_gvs = [(tf.clip_by_value(grad, -2., 2.), var) for grad, var in gvs]
-            self.optimizer = optimizer.apply_gradients(capped_gvs)
+        with tf.name_scope('train'):
+            self.optimizer = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss)
 
 
-    def convolution(self, x):
-        with tf.name_scope('cnn'):
-            pooled_outputs = []
-            for i, filter_size in enumerate(self.filter_sizes):
-                with tf.name_scope("conv-maxpool-%s" % filter_size):
-                    filter_shape = [filter_size, self.embedding_size, 1, self.filters_num]
-                    W = self.weight_variable(filter_shape)
-                    b = self.bias_variable([self.filters_num])
-                    conv = tf.nn.conv2d(x, W, [1, 1, 1, 1], padding='VALID')
-                    h = tf.nn.relu(tf.nn.bias_add(conv, b))
-                    pooled = tf.nn.avg_pool(h, ksize=[1, self.seq_length - filter_size + 1, 1, 1],
-                                            strides=[1, 1, 1, 1], padding='VALID')
-                    pooled_outputs.append(pooled)
 
-            h_pool = tf.concat(pooled_outputs, 3)
-            h_pool_flat = tf.reshape(h_pool, [-1, self.all_num_filters])
-        return h_pool_flat
 
-    def train_step(self, sources_batch, targets_batch, scores_batch, keep_prob):
+    def convolution(self, x, reuse=None):
+        pool_outputs = []
+        for i, filter_size in enumerate(self.filter_sizes):
+            limit = np.sqrt(6. / (filter_size + self.embedding_size))
+            conv = tf.layers.conv1d(x, self.filters_num, filter_size,
+                                    reuse=reuse, name='conv-%s' % filter_size,
+                                    kernel_initializer=tf.random_uniform_initializer(-1 * limit, limit))
+            pool = tf.layers.max_pooling1d(conv, self.seq_length - filter_size + 1, 1)
+            activate = tf.nn.relu(pool)
+
+            pool_outputs.append(tf.squeeze(activate, axis=1))
+        return pool_outputs
+
+    def weight_varible(self, shape):
+        f_in = shape[0]
+        f_out = 0 if len(shape) == 1 else shape[-1]
+        limit = np.sqrt(6. / (f_in + f_out))
+        init = tf.random_uniform(shape, minval=(-1 * limit), maxval=limit)
+        return tf.Variable(init)
+
+
+    def train_step(self, batch_sources, batch_targets, batch_scores_prob, keep_prob):
         feed_dict = {}
-        feed_dict[self.sources] = sources_batch
-        feed_dict[self.targets] = targets_batch
-        feed_dict[self.scores] = scores_batch
+        feed_dict[self.sources] = batch_sources
+        feed_dict[self.targets] = batch_targets
+        feed_dict[self.scores_prob] = batch_scores_prob
         feed_dict[self.keep_prob] = keep_prob
 
-        return [self.optimizer, self.pearson, self.loss, self.accuracy], feed_dict
+        return [self.optimizer, self.loss, self.pearson], feed_dict
 
-
-    def dev_step(self, sources_batch, targets_batch, scores_batch):
+    def dev_step(self, batch_sources, batch_targets, batch_scores_prob):
         feed_dict = {}
-        feed_dict[self.sources] = sources_batch
-        feed_dict[self.targets] = targets_batch
-        feed_dict[self.scores] = scores_batch
+        feed_dict[self.sources] = batch_sources
+        feed_dict[self.targets] = batch_targets
+        feed_dict[self.scores_prob] = batch_scores_prob
         feed_dict[self.keep_prob] = 1.0
 
-        return [self.pearson, self.loss, self.accuracy], feed_dict
+        return [self.loss, self.pearson], feed_dict
 
-    def weight_variable(self, shape):
-        """Create a weight variable with appropriate initialization."""
-        initial = tf.truncated_normal(shape, stddev=0.1)
-        return tf.Variable(initial)
 
-    def bias_variable(self, shape):
-        """Create a bias variable with appropriate initialization."""
-        initial = tf.constant(0.1, shape=shape)
-        return tf.Variable(initial)
 
-class CNNAttention:
+class CNN:
     def __init__(self, seq_length, class_num, filter_sizes, filters_num,
-                 embedding_size, attention_num, learning_rate, l2_reg_lambda=0.0):
-        self.name = 'cnnattention'
+                 embedding_size, learning_rate, l2_reg_lambda=0.0):
+        self.name = 'cnn'
         self.seq_length = seq_length
         self.class_num = class_num
         self.filter_sizes = filter_sizes
         self.filters_num = filters_num
         self.embedding_size = embedding_size
-        self.attention_num = attention_num
         self.learning_rate = learning_rate
         self.l2_reg_lambda = l2_reg_lambda
 
@@ -154,10 +156,13 @@ class CNNAttention:
     def build_network(self):
         self.sources = tf.placeholder(tf.int32, [None, self.seq_length], name='sources')
         self.targets = tf.placeholder(tf.int32, [None, self.seq_length], name='targets')
+        self.sources_length = tf.placeholder(tf.float32, [None], name='sources_length')
+        self.targets_length = tf.placeholder(tf.float32, [None], name='targets_length')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
         self.scores = tf.placeholder(tf.float32, [None], name='scores')
 
         self.l2_loss = tf.constant(0.0)
+
 
         # embedding layer
         with tf.variable_scope('source_embedding', reuse=True):
@@ -168,123 +173,142 @@ class CNNAttention:
             target_embedding = tf.get_variable('target_embedding')
             targets = tf.nn.embedding_lookup(target_embedding, self.targets)
 
-
-        sources = tf.expand_dims(sources, -1)
-        targets = tf.expand_dims(targets, -1)
-
-
-        self.all_num_filters = self.filters_num * len(self.filter_sizes)
-        # [batch, 3, filters_num]
-        sources = self.convolution(sources)
-        targets = self.convolution(targets)
-
-        # sources = self.attention(sources)
-        # targets = self.attention(targets)
-
-        sdv = tf.concat([tf.abs(sources - targets), sources * targets], axis=1)
-
-        with tf.name_scope('drop_out'):
-            h_drop = tf.nn.dropout(sdv, self.keep_prob)
+        sources = tf.nn.dropout(sources, self.keep_prob)
+        targets = tf.nn.dropout(targets, self.keep_prob)
 
 
-        with tf.name_scope('output'):
-            W = self.weight_variable([2 * self.all_num_filters, self.class_num])
-            b = self.bias_variable([self.class_num])
-            self.l2_loss += tf.nn.l2_loss(W)
-            self.l2_loss += tf.nn.l2_loss(b)
-            self.logits = tf.matmul(h_drop, W) + b
-            self.logits = tf.reshape(self.logits, [-1])
+        with tf.name_scope('convolution'):
+            source_outputs = []
+            target_outputs = []
+            for filter_size in self.filter_sizes:
+                if filter_size == self.seq_length:
+                    source_outputs.append(self.horizon_convolution(sources, filter_size, 'max'))
+                    target_outputs.append(self.horizon_convolution(targets, filter_size, 'max', True))
+                else:
+                    source_outputs.append(self.horizon_convolution(sources, filter_size, 'max'))
+                    target_outputs.append(self.horizon_convolution(targets, filter_size, 'max', True))
+                    source_outputs.append(self.horizon_convolution(sources, filter_size, 'avg'))
+                    target_outputs.append(self.horizon_convolution(targets, filter_size, 'avg', True))
+                    source_outputs.append(self.horizon_convolution(sources, filter_size, 'min'))
+                    target_outputs.append(self.horizon_convolution(targets, filter_size, 'min', True))
+            self.all_filter_num = len(self.filter_sizes) * self.filters_num
 
-        with tf.name_scope('loss'):
-            losses = tf.nn.sigmoid_cross_entropy_with_logits(labels=self.scores, logits=self.logits)
-            self.loss = tf.reduce_mean(losses) + self.l2_reg_lambda * self.l2_loss
-            tf.summary.scalar('loss', self.loss)
+        with tf.name_scope('operation'):
 
-        self.logits = tf.sigmoid(self.logits)
+            sims = [tf.expand_dims(self.make_pearson(source_outputs[i], target_outputs[i]), axis=-1)
+                        for i in range(len(source_outputs))]
+
+            # source_sdv = tf.reduce_sum(sources, axis=1) / tf.expand_dims(self.sources_length, 1)
+            # target_sdv = tf.reduce_sum(targets, axis=1) / tf.expand_dims(self.targets_length, 1)
+            #
+            # sims.append(tf.expand_dims(self.make_pearson(source_sdv, target_sdv), axis=-1))
+
+            softmax_w = tf.nn.softmax(self.weight_varible([1, len(sims)]))
+            self.l2_loss += tf.nn.l2_loss(softmax_w)
+
+            sims = tf.concat(sims, axis=-1)
+
+            self.temp = softmax_w
+            self.logits = tf.reduce_sum(sims * softmax_w, axis=-1)
 
         with tf.name_scope('pearson'):
-            mid1 = tf.reduce_mean(self.logits * self.scores) - \
-                   tf.reduce_mean(self.logits) * tf.reduce_mean(self.scores)
-
-            mid2 = tf.sqrt(tf.reduce_mean(tf.square(self.logits)) - tf.square(tf.reduce_mean(self.logits))) * \
-                   tf.sqrt(tf.reduce_mean(tf.square(self.scores)) - tf.square(tf.reduce_mean(self.scores)))
-
-            self.pearson = mid1 / mid2
-            tf.summary.scalar('pearson', self.pearson)
-
-        with tf.name_scope('accuracy'):
-            self.accuracy = 1 - tf.reduce_mean(tf.abs(self.logits - self.scores))
-            tf.summary.scalar('accuracy', self.accuracy)
+            self.pearson = self.make_pearson(self.logits, self.scores)
 
 
+        with tf.name_scope('loss'):
+            self.loss = tf.reduce_mean(tf.square(self.scores - self.logits)) + self.l2_reg_lambda * self.l2_loss
 
-        with tf.name_scope('training'):
-            optimizer = tf.train.AdamOptimizer(self.learning_rate)
-            gvs = optimizer.compute_gradients(self.loss)
-            capped_gvs = [(tf.clip_by_value(grad, -2., 2.), var) for grad, var in gvs]
-            self.optimizer = optimizer.apply_gradients(capped_gvs)
+        with tf.name_scope('train'):
+            self.optimizer = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss)
 
-    def attention(self, x):
-        # x ==> [batch, conv_num, filters_num]
-        with tf.name_scope('attention'):
-            attn_w = self.weight_variable([self.filters_num, self.attention_num])
-            attn_b = self.bias_variable([self.attention_num])
-            attn_v = self.weight_variable([self.attention_num, 1])
-            attn_activate = tf.tanh(tf.einsum('ijk,kl->ijl', x, attn_w) + attn_b)
-            # [batch, 3]
-            attn_prob = tf.nn.softmax(tf.squeeze(tf.einsum('ijk,kl->ijl', attn_activate, attn_v), 2))
-            attn_out = tf.squeeze(tf.matmul(tf.expand_dims(attn_prob, 1), x), 1)
-        return attn_out
+    def make_pearson(self, v1, v2):
+        mid1 = tf.reduce_mean(v1 * v2, axis=-1) - \
+               tf.reduce_mean(v1, axis=-1) * tf.reduce_mean(v2, axis=-1)
+
+        mid2 = tf.sqrt(tf.reduce_mean(tf.square(v1), axis=-1) - tf.square(tf.reduce_mean(v1, axis=-1))) * \
+               tf.sqrt(tf.reduce_mean(tf.square(v2), axis=-1) - tf.square(tf.reduce_mean(v2, axis=-1)))
+
+        return mid1 / mid2
+
+    def horizon_convolution(self, x, filter_size, type, reuse=None):
+        limit = np.sqrt(6. / (filter_size + self.embedding_size))
+        conv = tf.layers.conv1d(x, self.filters_num, filter_size,
+                                reuse=reuse, name='h-conv-' + type + '-%s' % filter_size,
+                                kernel_initializer=tf.random_uniform_initializer(-1 * limit, limit),
+                                kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.l2_reg_lambda),
+                                bias_regularizer=tf.contrib.layers.l2_regularizer(scale=self.l2_reg_lambda))
+        if type == 'max':
+            pool = tf.layers.max_pooling1d(conv, self.seq_length - filter_size + 1, 1)
+        elif type == 'avg':
+            pool = tf.layers.average_pooling1d(conv, self.seq_length - filter_size + 1, 1)
+        else:
+            pool = -1 * tf.layers.max_pooling1d(-1 * conv, self.seq_length - filter_size + 1, 1)
+
+        activate = LeakyRelu(pool)
+
+        output = tf.squeeze(activate, axis=1)
+
+        output = tf.nn.dropout(output, self.keep_prob)
+        return output
+
+    def vertical_convolution(self, x, filter_size, type, reuse=None):
+        x = tf.expand_dims(x, -1)
+        limit = np.sqrt(6. / (filter_size + self.seq_length))
+        conv = tf.layers.conv2d(x, self.filters_num, [self.seq_length, filter_size],
+                                reuse=reuse, name='v-conv-' + type + '-%s' % filter_size,
+                                kernel_initializer=tf.random_uniform_initializer(-1 * limit, limit),
+                                kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=self.l2_reg_lambda),
+                                bias_regularizer=tf.contrib.layers.l2_regularizer(scale=self.l2_reg_lambda))
+        if type == 'max':
+            pool = tf.layers.max_pooling2d(conv, [1, self.embedding_size - filter_size + 1], 1)
+        elif type == 'avg':
+            pool = tf.layers.average_pooling2d(conv, [1, self.embedding_size - filter_size + 1], 1)
+        else:
+            pool = -1 * tf.layers.max_pooling2d(-1 * conv, [1, self.embedding_size - filter_size + 1], 1)
+
+        activate = LeakyRelu(pool)
+
+        output = tf.squeeze(activate, axis=[1, 2])
+
+        output = tf.nn.dropout(output, self.keep_prob)
+        return output
+    def weight_varible(self, shape):
+        f_in = shape[0]
+        f_out = 0 if len(shape) == 1 else shape[-1]
+        limit = np.sqrt(6. / (f_in + f_out))
+        init = tf.random_uniform(shape, minval=(-1 * limit), maxval=limit)
+        return tf.Variable(init)
 
 
-    def convolution(self, x):
-        with tf.name_scope('cnn'):
-            pooled_outputs = []
-            for i, filter_size in enumerate(self.filter_sizes):
-                with tf.name_scope("conv-maxpool-%s" % filter_size):
-                    filter_shape = [filter_size, self.embedding_size, 1, self.filters_num]
-                    W = self.weight_variable(filter_shape)
-                    b = self.bias_variable([self.filters_num])
-                    conv = tf.nn.conv2d(x, W, [1, 1, 1, 1], padding='VALID')
-                    h = tf.nn.relu(tf.nn.bias_add(conv, b))
-                    pooled = self.attention(tf.squeeze(h, 2))
-                    # pooled = tf.nn.avg_pool(h, ksize=[1, self.seq_length - filter_size + 1, 1, 1],
-                    #                         strides=[1, 1, 1, 1], padding='VALID')
-                    pooled_outputs.append(pooled)
-
-            h_pool = tf.concat(pooled_outputs, 1)
-        return h_pool
-
-    def train_step(self, sources_batch, targets_batch, scores_batch, keep_prob):
+    def train_step(self, batch_sources, batch_targets, batch_scores_prob, source_length_batch, target_length_batch, keep_prob):
         feed_dict = {}
-        feed_dict[self.sources] = sources_batch
-        feed_dict[self.targets] = targets_batch
-        feed_dict[self.scores] = scores_batch
+        feed_dict[self.sources] = batch_sources
+        feed_dict[self.targets] = batch_targets
+        feed_dict[self.scores] = batch_scores_prob
         feed_dict[self.keep_prob] = keep_prob
+        feed_dict[self.sources_length] = source_length_batch
+        feed_dict[self.targets_length] = target_length_batch
 
-        return [self.optimizer, self.pearson, self.loss, self.accuracy], feed_dict
+        return [self.optimizer, self.loss, self.pearson], feed_dict
 
-
-    def dev_step(self, sources_batch, targets_batch, scores_batch):
+    def dev_step(self, batch_sources, batch_targets, batch_scores_prob, source_length_batch, target_length_batch):
         feed_dict = {}
-        feed_dict[self.sources] = sources_batch
-        feed_dict[self.targets] = targets_batch
-        feed_dict[self.scores] = scores_batch
+        feed_dict[self.sources] = batch_sources
+        feed_dict[self.targets] = batch_targets
+        feed_dict[self.scores] = batch_scores_prob
         feed_dict[self.keep_prob] = 1.0
+        feed_dict[self.sources_length] = source_length_batch
+        feed_dict[self.targets_length] = target_length_batch
 
-        return [self.pearson, self.loss, self.accuracy], feed_dict
+        return [self.loss, self.pearson], feed_dict
 
-    def weight_variable(self, shape):
-        """Create a weight variable with appropriate initialization."""
-        initial = tf.truncated_normal(shape, stddev=0.1)
-        return tf.Variable(initial)
+    def test_step(self, batch_sources, batch_targets, batch_scores_prob, source_length_batch, target_length_batch):
+        feed_dict = {}
+        feed_dict[self.sources] = batch_sources
+        feed_dict[self.targets] = batch_targets
+        feed_dict[self.scores] = batch_scores_prob
+        feed_dict[self.keep_prob] = 1.0
+        feed_dict[self.sources_length] = source_length_batch
+        feed_dict[self.targets_length] = target_length_batch
 
-    def bias_variable(self, shape):
-        """Create a bias variable with appropriate initialization."""
-        initial = tf.constant(0.1, shape=shape)
-        return tf.Variable(initial)
-
-
-
-
-
+        return [self.loss, self.pearson, self.temp], feed_dict

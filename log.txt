@@ -1,166 +1,149 @@
-------------------------
-seq_length = 30
-class_num = 6
-embedding_size = 100
-filter_sizes = [1, 2, 3]
-filter_num = 100
-batch_size = 32
-epochs_num = 32
+sts benchmark
+1. no average pooling 12 times
+--- max dev pearson: 0.8297 --- max test pearson: 0.7861 ---
+--- max dev pearson: 0.8336 --- max test pearson: 0.7871 ---
+--- max dev pearson: 0.8310 --- max test pearson: 0.7839 ---
+--- max dev pearson: 0.8270 --- max test pearson: 0.7863 ---
+--- max dev pearson: 0.8304 --- max test pearson: 0.7863 ---
+--- max dev pearson: 0.8331 --- max test pearson: 0.7859 ---
+--- max dev pearson: 0.8246 --- max test pearson: 0.7799 ---
+--- max dev pearson: 0.8308 --- max test pearson: 0.7853 ---
+--- max dev pearson: 0.8323 --- max test pearson: 0.7892 ---
+--- max dev pearson: 0.8329 --- max test pearson: 0.7904 ---
+--- max dev pearson: 0.8272 --- max test pearson: 0.7872 ---
+--- max dev pearson: 0.8278 --- max test pearson: 0.7838 ---
 
-dev: 0.3388  test: 0.1024
-------------------------
+2. Concatenate 10 times
+--- max dev pearson: 0.8241 --- max test pearson: 0.7707 ---
+--- max dev pearson: 0.8238 --- max test pearson: 0.7729 ---
+--- max dev pearson: 0.8206 --- max test pearson: 0.7753 ---
+--- max dev pearson: 0.8212 --- max test pearson: 0.7680 ---
+--- max dev pearson: 0.8247 --- max test pearson: 0.7721 ---
+--- max dev pearson: 0.8206 --- max test pearson: 0.7752 ---
+--- max dev pearson: 0.8181 --- max test pearson: 0.7670 ---
+--- max dev pearson: 0.8194 --- max test pearson: 0.7727 ---
+--- max dev pearson: 0.8213 --- max test pearson: 0.7664 ---
+--- max dev pearson: 0.8210 --- max test pearson: 0.7730 ---
 
-------------------------
-seq_length = 30
-class_num = 6
-embedding_size = 100
-filter_sizes = [1, 2, 3, 4, 5]
-filter_num = 100
-batch_size = 32
-epochs_num = 32
+3. multi attention
+--- max dev pearson: 0.8150 --- max test pearson: 0.7805 ---
+--- max dev pearson: 0.8255 --- max test pearson: 0.7838 ---
+--- max dev pearson: 0.8308 --- max test pearson: 0.7837 ---
+--- max dev pearson: 0.8244 --- max test pearson: 0.7893 ---
+--- max dev pearson: 0.8219 --- max test pearson: 0.7858 ---
+--- max dev pearson: 0.8133 --- max test pearson: 0.7737 ---
+--- max dev pearson: 0.8145 --- max test pearson: 0.7702 ---
+--- max dev pearson: 0.8193 --- max test pearson: 0.7920 ---
+--- max dev pearson: 0.8089 --- max test pearson: 0.7650 ---
+--- max dev pearson: 0.8257 --- max test pearson: 0.7825 ---
+--- max dev pearson: 0.8202 --- max test pearson: 0.7754 ---
 
-dev: 0.3568  test: 0.1721
-------------------------
+4. single attention
+--- max dev pearson: 0.8253 --- max test pearson: 0.7782 ---
+--- max dev pearson: 0.8201 --- max test pearson: 0.7795 ---
+--- max dev pearson: 0.8172 --- max test pearson: 0.7776 ---
+--- max dev pearson: 0.8213 --- max test pearson: 0.7761 ---
+--- max dev pearson: 0.8190 --- max test pearson: 0.7810 ---
+--- max dev pearson: 0.8217 --- max test pearson: 0.7809 ---
+--- max dev pearson: 0.8196 --- max test pearson: 0.7730 ---
+--- max dev pearson: 0.8125 --- max test pearson: 0.7769 ---
+--- max dev pearson: 0.8183 --- max test pearson: 0.7779 ---
+--- max dev pearson: 0.8190 --- max test pearson: 0.7790 ---
 
-------------------------
-seq_length = 30
-class_num = 6
-embedding_size = 100
-filter_sizes = [1, 2, 3]
-filter_num = 200
-batch_size = 32
-epochs_num = 32
+5. gru as feature
+--- max dev pearson: 0.8293 --- max test pearson: 0.7849 ---
+--- max dev pearson: 0.8273 --- max test pearson: 0.7821 ---
+--- max dev pearson: 0.8316 --- max test pearson: 0.7918 ---
+--- max dev pearson: 0.8296 --- max test pearson: 0.7879 ---
+--- max dev pearson: 0.8319 --- max test pearson: 0.7825 ---
+--- max dev pearson: 0.8291 --- max test pearson: 0.7869 ---
+--- max dev pearson: 0.8264 --- max test pearson: 0.7814 ---
+--- max dev pearson: 0.8318 --- max test pearson: 0.7860 ---
+--- max dev pearson: 0.8280 --- max test pearson: 0.7853 ---
+--- max dev pearson: 0.8290 --- max test pearson: 0.7889 ---
+--- max dev pearson: 0.8279 --- max test pearson: 0.7909 ---
 
-dev: 0.3598  test: 0.1357
-------------------------
+13 layer fine tune max 1e-6 0.791981
 
-------------------------
-seq_length = 30
-class_num = 6
-embedding_size = 100
-filter_sizes = [1, 2, 3]
-filter_num = 300
-batch_size = 32
-epochs_num = 32
+19, 20 layer fine tune max 1e-4 0.792770
+19, 20 layer fine tune max 1e-5 0.792074
 
-dev: 0.3898  test: 0.1078
-------------------------
+3, 4, 5, 13 layer fine tune max 1e-4 0.792448
+3, 4, 5, 13 layer fine tune max 1e-6
 
-------------------------
-seq_length = 20
-class_num = 6
-embedding_size = 100
-filter_sizes = [1, 2, 3]
-filter_num = 100
-batch_size = 32
-epochs_num = 32
-
-dev: 0.3905  test: 0.1536
-------------------------
-
-------------------------
-seq_length = 20
-class_num = 6
-embedding_size = 100
-filter_sizes = [1, 2, 3]
-filter_num = 100
-batch_size = 32
-epochs_num = 32
-
-dev: 0.3905  test: 0.1536
-------------------------
-
-------------------------
-seq_length = 20
-class_num = 6
-embedding_size = 100
-filter_sizes = [1, 2, 3]
-filter_num = 100
-batch_size = 32
-epochs_num = 32
-regularizer_rate = 0.004
-
-dev: 0.3501  test: 0.1564
-------------------------
-
-------------------------
-seq_length = 20
-class_num = 6
-embedding_size = 100
-filter_sizes = [1, 2, 3]
-filter_num = 100
-batch_size = 64
-epochs_num = 64
-drop_out_rate = 0.5 (sdv)
-
-dev: 0.4163  test: 0.2066
-------------------------
-
-------------------------
-seq_length = 20
-class_num = 6
-embedding_size = 100
-filter_sizes = [1, 2, 3]
-filter_num = 300
-batch_size = 64
-epochs_num = 64
-drop_out_rate = 0.5 (output1)
-
-dev: 0.3815  test: 0.1425
-------------------------
-
-------------------------
-seq_length = 20
-class_num = 6
-embedding_size = 100
-filter_sizes = [1, 2, 3]
-filter_num = 100
-batch_size = 64
-epochs_num = 128
-drop_out_rate = 0.8 (sdv)
-
-dev: 0.4288  test: 0.1889
-------------------------
-
-------------------------
-seq_length = 20
-class_num = 6
-embedding_size = 100
-filter_sizes = [1, 2, 3]
-filter_num = 100
-batch_size = 64
-epochs_num = 64
-drop_out_rate = 0.2 (sdv)
-
-dev: 0.4011  test: 0.1773
-------------------------
-abs(sub) + add - mul matrix
-cnn  dev_max : 0.5233
+6. concatenate w1(sub) w2(mul)
+--- max dev pearson: 0.8155 --- max test pearson: 0.7717 ---
+--- max dev pearson: 0.8145 --- max test pearson: 0.7744 ---
+--- max dev pearson: 0.8238 --- max test pearson: 0.7730 ---
+--- max dev pearson: 0.8099 --- max test pearson: 0.7582 ---
+--- max dev pearson: 0.8186 --- max test pearson: 0.7770 ---
 
 
+semeval 2017
+1. single attention
+--- max dev pearson: 0.8271 --- max test pearson: 0.6732 ---
+--- max dev pearson: 0.8261 --- max test pearson: 0.6660 ---
+--- max dev pearson: 0.8267 --- max test pearson: 0.6705 ---
+--- max dev pearson: 0.8329 --- max test pearson: 0.6740 ---
+--- max dev pearson: 0.8370 --- max test pearson: 0.6740 ---
+--- max dev pearson: 0.8241 --- max test pearson: 0.6657 ---
+
+2. multi attention
+--- max dev pearson: 0.8169 --- max test pearson: 0.6616 ---
+--- max dev pearson: 0.8182 --- max test pearson: 0.6495 ---
+--- max dev pearson: 0.8283 --- max test pearson: 0.6658 ---
+--- max dev pearson: 0.8244 --- max test pearson: 0.6617 ---
+--- max dev pearson: 0.8228 --- max test pearson: 0.6656 ---
+--- max dev pearson: 0.8252 --- max test pearson: 0.6623 ---
+
+3. gru as feature
+--- max dev pearson: 0.8378 --- max test pearson: 0.6691 ---
+--- max dev pearson: 0.8308 --- max test pearson: 0.6703 ---
+--- max dev pearson: 0.8324 --- max test pearson: 0.6858 ---
+--- max dev pearson: 0.8304 --- max test pearson: 0.6755 ---
+--- max dev pearson: 0.8337 --- max test pearson: 0.6760 ---
+--- max dev pearson: 0.8299 --- max test pearson: 0.6719 ---
+--- max dev pearson: 0.8357 --- max test pearson: 0.6710 ---
+--- max dev pearson: 0.8352 --- max test pearson: 0.6729 ---
+--- max dev pearson: 0.8357 --- max test pearson: 0.6791 ---
+--- max dev pearson: 0.8321 --- max test pearson: 0.6626 ---
+
+250/250 [==============================] - 1s 3ms/step
+AR-AR --- test loss: 4.3781 --- test pearson: 0.7090 ---
+
+250/250 [==============================] - 1s 2ms/step
+AR-EN --- test loss: 4.2817 --- test pearson: 0.7074 ---
+
+250/250 [==============================] - 1s 3ms/step
+SP-SP --- test loss: 3.6458 --- test pearson: 0.8275 ---
+
+250/250 [==============================] - 1s 3ms/step
+SP-EN --- test loss: 3.7683 --- test pearson: 0.7763 ---
+
+250/250 [==============================] - 1s 3ms/step
+SP-EN-WMT --- test loss: 6.2149 --- test pearson: 0.2787 ---
+
+250/250 [==============================] - 1s 3ms/step
+EN-EN --- test loss: 3.3291 --- test pearson: 0.8276 ---
+
+250/250 [==============================] - 1s 3ms/step
+EN-TR --- test loss: 4.5488 --- test pearson: 0.6888 ---
+
+Primary --- test loss: 4.3095 --- test pearson: 0.687900 ---
+
+4. k-max pooling 1
+--- max dev pearson: 0.8349 --- max test pearson: 0.6803 ---
+--- max dev pearson: 0.8380 --- max test pearson: 0.6757 ---
+--- max dev pearson: 0.8304 --- max test pearson: 0.6725 ---
+--- max dev pearson: 0.8323 --- max test pearson: 0.6754 ---
+--- max dev pearson: 0.8289 --- max test pearson: 0.6876 ---
+--- max dev pearson: 0.8363 --- max test pearson: 0.6774 ---
+--- max dev pearson: 0.8327 --- max test pearson: 0.6694 ---
+--- max dev pearson: 0.8329 --- max test pearson: 0.6727 ---
+--- max dev pearson: 0.8315 --- max test pearson: 0.6728 ---
+--- max dev pearson: 0.8321 --- max test pearson: 0.6692 ---
 
 
-lstm
-------------------------
-seq_length = 20
-class_num = 6
-embedding_size = 100
-hidden_size = 100
-batch_size = 64
-epochs_num = 128
-
-dev: 0.2451  test: 0.0504
-------------------------
-bilstm
-------------------------
-seq_length = 20
-class_num = 6
-embedding_size = 100
-hidden_size = 100
-batch_size = 64
-epochs_num = 128
-
-dev: 0.2504  test: 0.0661
-------------------------
-
-
+5. k-max pooling 1 + gru as feature
+--- max dev pearson: 0.8354 --- max test pearson: 0.6842 ---
+--- max dev pearson: 0.8322 --- max test pearson: 0.6735 ---

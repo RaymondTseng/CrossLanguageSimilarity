@@ -1,37 +1,41 @@
 
 import data_helper
 from utils import utils
-from keras.layers import Dense, Input, Concatenate, Subtract, Multiply, Reshape, Lambda, Add, Activation, GRU
-from keras.layers import Conv1D, MaxPooling1D, Embedding, Dropout, regularizers, AveragePooling1D, Masking, RepeatVector
+from keras.layers import Dense, Input, Concatenate, Subtract, Multiply, Reshape, Lambda, Add, Activation
+from keras.layers import Conv1D, MaxPooling1D, Embedding, Dropout, regularizers, AveragePooling1D, GRU, Masking
 from keras.models import Model
 import keras.backend as kb
 from keras.optimizers import *
+from KMaxPooling import KMaxPooling
 import numpy as np
 
+# 1st 73.16 2nd 67.89 3rd 65.98
 
-
-train_path = '/home/raymond/Downloads/data/sts-train.csv'
-dev_path = '/home/raymond/Downloads/data/sts-dev.csv'
-test_path = '/home/raymond/Downloads/data/sts-test.csv'
+train_path = '/home/raymond/Downloads/semeval_en/semeval.train.txt'
+dev_path = '/home/raymond/Downloads/semeval_en/semeval.dev.txt'
+test_path = '/home/raymond/Downloads/semeval_en/semeval.test.txt'
 embedding_path = '/home/raymond/Downloads/data/glove.6B.300d.txt'
+
 
 seq_length = 30
 class_num = 6
 embedding_size = 300
 filter_sizes = [1, 2, 3]
 filter_num = 300
+k = 3
 batch_size = 64
-epochs_num = 28
+epochs_num = 32
 drop_out_rate = 0.5
 regularizer_rate = 0.004
 
-
+tracks = ['AR-AR', 'AR-EN', 'SP-SP', 'SP-EN', 'SP-EN-WMT', 'EN-EN', 'EN-TR']
 
 
 print ("loading data...")
-train_sources, train_targets, train_scores = data_helper.load_sts_data(train_path)
-dev_sources, dev_targets, dev_scores = data_helper.load_sts_data(dev_path)
-test_sources, test_targets, test_scores = data_helper.load_sts_data(test_path)
+train_sources, train_targets, train_scores = data_helper.load_cross_lang_sentence_data(train_path, True)
+dev_sources, dev_targets, dev_scores = data_helper.load_cross_lang_sentence_data(dev_path, True)
+test_sources, test_targets, test_scores = data_helper.load_cross_lang_sentence_data(test_path, False)
+
 
 word2idx, word_embeddings = data_helper.load_embedding(embedding_path, True)
 
@@ -47,9 +51,11 @@ dev_targets, dev_targets_length = utils.word2id(dev_targets, word2idx, seq_lengt
 test_sources, test_sources_length = utils.word2id(test_sources, word2idx, seq_length)
 test_targets, test_targets_length = utils.word2id(test_targets, word2idx, seq_length)
 
+
 train_score_probs = utils.build_porbs(train_scores, class_num)
 dev_score_probs = utils.build_porbs(dev_scores, class_num)
 test_score_probs = utils.build_porbs(test_scores, class_num)
+
 
 def kl_distance(y_true, y_pred):
     y_true = kb.clip(y_true, 1e-10, 1.)
@@ -153,24 +159,39 @@ def main():
         if results[1] > max_dev_pearson:
             max_dev_pearson = results[1]
 
-        results = model.evaluate([test_sources, test_targets], test_score_probs, batch_size=len(test_score_probs))
-        print('--- test loss: %.4f --- test pearson: %.4f ---' % (results[0], results[1]))
-        if results[1] > max_test_pearson:
-            max_test_pearson = results[1]
+        # results = model.evaluate([test_sources, test_targets], test_score_probs, batch_size=250)
+        # print('--- test loss: %.4f --- test pearson: %.4f ---' % (results[0], results[1]))
+        # if results[1] > max_test_pearson:
+        #     max_test_pearson = results[1]
+        # print('')
+        # if results[1] > 0.76:
+        #     model.save_weights('../save/cnn.semeval.model.weights.' + str(round(results[1], 4)))
+
+        temp_loss = 0.
+        temp_pearson = 0.
+        for i in range(7):
+            start = i * 250
+            end = start + 250
+            results = model.evaluate([test_sources[start:end], test_targets[start:end]], test_score_probs[start:end],
+                                     batch_size=250)
+            print(tracks[i] + ' --- test loss: %.4f --- test pearson: %.4f ---' % (results[0], results[1]))
+            temp_loss += results[0]
+            temp_pearson += results[1]
         print('')
-        if results[1] > 0.7919:
-            model.save_weights('../save/cnn.model.weights.' + str(round(results[1], 4)))
-
-
+        temp_loss /= 7
+        temp_pearson /= 7
+        print('Primary --- test pearson: %.4f --- test loss: %.4f ---' % (temp_pearson, temp_loss))
+        if temp_pearson > max_test_pearson:
+            max_test_pearson = temp_pearson
+        print('')
+        if temp_pearson > 0.687:
+            model.save_weights('../save/cnn.semeval.model.weights.' + str(round(temp_pearson, 4)))
 
     print('--- max dev pearson: %.4f --- max test pearson: %.4f ---' % (max_dev_pearson, max_test_pearson))
     model = None
 
-for i in range(5):
-    main()
 
-
-
+main()
 
 
 

@@ -9,11 +9,11 @@ import time
 
 
 # Model Hyper Parameters
-tf.flags.DEFINE_integer('filters_num', 300, 'Number of filters per filter size (default: 128)')
+tf.flags.DEFINE_integer('hidden_size', 300, 'hidden size in LSTM layer (default: 128)')
 tf.flags.DEFINE_integer('seq_length', 30, 'sequence length (default 36)')
 tf.flags.DEFINE_integer('class_num', 6, 'classes number (default 1)')
+tf.flags.DEFINE_integer('layer_num', 1, 'Number of BiLSTM layer (default: 1)')
 tf.flags.DEFINE_integer('embedding_size', 300, 'embedding size')
-tf.flags.DEFINE_string('filter_sizes', '1,2,3', 'Comma-separated filter sizes (default: "3,4,5")')
 tf.flags.DEFINE_float("keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
 tf.flags.DEFINE_float("l2_reg_lambda", 0.004, "L2 regularization lambda (default: 0.0)")
 
@@ -30,7 +30,7 @@ tf.flags.DEFINE_boolean('if_train', True, 'training or load')
 
 # Training Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("epochs_num", 32, "Number of training epochs (default: 64)")
+tf.flags.DEFINE_integer("epochs_num", 64, "Number of training epochs (default: 64)")
 tf.flags.DEFINE_float('learning_rate', 1e-3, 'Learning rate')
 
 
@@ -91,13 +91,14 @@ with tf.Graph().as_default():
                                         initializer=tf.constant_initializer(word_embedding), trainable=False)
 
 
-        model = CNN_PROB(FLAGS.seq_length, FLAGS.class_num, map(int, FLAGS.filter_sizes.split(',')), FLAGS.filters_num,
-                       FLAGS.embedding_size, FLAGS.learning_rate, FLAGS.l2_reg_lambda)
+        model = LSTM_PROB(FLAGS.seq_length, FLAGS.hidden_size, FLAGS.layer_num, FLAGS.class_num, FLAGS.learning_rate,
+                          FLAGS.l2_reg_lambda)
 
         saver = tf.train.Saver()
 
         if FLAGS.if_train:
             session.run(tf.global_variables_initializer())
+            session.run(tf.local_variables_initializer())
         else:
             saver.restore(session, FLAGS.save_path)
 
@@ -140,7 +141,7 @@ with tf.Graph().as_default():
             print('----------------------------------------------------------------------------------')
 
             if (epoch % 1 == 0):
-                ops, feed_dict = model.test_step(test_sources, test_targets, test_scores_prob,
+                ops, feed_dict = model.dev_step(test_sources, test_targets, test_scores_prob,
                                                 test_sources_length, test_targets_length)
                 loss, pearson = session.run(ops, feed_dict=feed_dict)
 

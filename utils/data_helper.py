@@ -6,13 +6,14 @@ import numpy as np
 import random
 import os
 
-def load_cross_lang_sentence_data(path):
+def load_cross_lang_sentence_data(path, if_shuffle):
     source_sentences = []
     target_sentences = []
     scores = []
     f = open(path, 'r')
     lines = f.readlines()
-    random.shuffle(lines)
+    if if_shuffle:
+        random.shuffle(lines)
     for line in lines:
         line = line.strip()
         temp = line.split('\t')
@@ -66,11 +67,13 @@ def load_embedding(path, zero):
     word2idx = {}
     word_embedding = wv.vectors
     if zero:
-        for i in range(1, len(vocab) + 1):
-            word2idx[vocab[i-1]] = i
+        for i in range(2, len(vocab) + 2):
+            word2idx[vocab[i-2]] = i
         word2idx['<0>'] = 0
+        word2idx['<unk>'] = 1
         word_zero = np.zeros(len(word_embedding[0]))
-        word_embedding = np.vstack([word_zero, word_embedding])
+        word_mean = np.mean(word_embedding, axis=0)
+        word_embedding = np.vstack([word_zero, word_mean, word_embedding])
     else:
         for i in range(len(vocab)):
             word2idx[vocab[i]] = i

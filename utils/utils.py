@@ -4,6 +4,7 @@ from nltk.tokenize import WordPunctTokenizer
 import nltk
 import numpy as np
 import re
+from PIL import Image
 punc = u"[\s+\.\!\/_,\-\?$%^*()+\"\']+|[+——！，。？、~@#￥%……&*（）]+"
 
 nltk_pos_set = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNP', 'MNPS', 'NNS', 'PDT',
@@ -17,6 +18,7 @@ def get_id(word):
 
 def word2id(sentences, word2idx, seq_length):
     idx = []
+    all_length = []
     global word2idx_
     word2idx_ = word2idx
     for sentence in sentences:
@@ -27,12 +29,32 @@ def word2id(sentences, word2idx, seq_length):
         except:
             print(sentence)
         if len(words) < seq_length:
+            all_length.append(len(words))
             for _ in range(len(words), seq_length):
                 words.append('<0>')
         elif len(words) > seq_length:
             words = words[:seq_length]
+            all_length.append(seq_length)
+        else:
+            all_length.append(seq_length)
         id = list(map(get_id, words))
         idx.append(id)
+    return np.array(idx), np.array(all_length)
+
+def tag2id(all_tags, tag2idx, seq_length):
+    idx = []
+    global word2idx_
+    for tags in all_tags:
+        if len(tags) < seq_length:
+            for _ in range(len(tags), seq_length):
+                tags.append('<0>')
+        elif len(tags) > seq_length:
+            tags = tags[:seq_length]
+        id = []
+        for tag in tags:
+            id.append(tag2idx.get(tag, tag2idx['<unk>']))
+        idx.append(id)
+
     return np.array(idx)
 
 def load_word2idx(path):
@@ -131,6 +153,9 @@ def build_porbs(scores, class_num):
         probs.append(prob)
     return np.array(probs)
 
+def normalize_probs(scores):
+    return [score / 5. for score in scores]
+
 def pearson(x1, x2):
     mid1 = np.mean(x1 * x2) - \
            np.mean(x1) * np.mean(x2)
@@ -142,41 +167,20 @@ def pearson(x1, x2):
 
     return pearson
 
+def pos_tag(all_words):
+    all_tags = []
+    for words in all_words:
+        tokens = nltk.pos_tag(words)
+        tags = [token[1] for token in tokens]
+        all_tags.append(tags)
+    return all_tags
 
-# path = '/home/raymond/Downloads/all_cross-lingual_data/STS.input.track4b.es-en.txt'
-# lines = []
-# f = open(path, 'r')
-# for line in f.readlines():
-#     temp = line.strip().split('\t')
-#     lines.append(temp[1] + '\t' + temp[0] + '\t')
-# f.close()
-# scores = open('/home/raymond/Downloads/all_cross-lingual_data/STS.gs.track4b.es-en.txt', 'r').readlines()
-# f = open('/home/raymond/Downloads/all_cross-lingual_data/STS.dev.b.es-en', 'w')
-# for i, line in enumerate(lines):
-#     f.write(line + scores[i])
-# f.close()
+def sigmoid(x):
+    return 1 / (1 + np.exp(-1 * x))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def weight2img(weights):
+    weights = sigmoid(weights) * 255
+    img = Image.fromarray(weights)
+    img.show()
 
 
