@@ -97,10 +97,12 @@ for filter_size in filter_sizes:
     target_outputs.append(target_sdv)
 
 mask = Masking()
-gru = GRU(filter_num, dropout=drop_out_rate, recurrent_dropout=0.2)
+gru = GRU(filter_num, dropout=drop_out_rate, recurrent_dropout=0.2, return_sequences=True)
 
-source_outputs.append(gru(mask(source)))
-target_outputs.append(gru(mask(target)))
+get_last_output = Lambda(lambda x: kb.reshape(x[:, -1, :], [-1, filter_num]))
+
+source_outputs.append(get_last_output(gru(mask(source))))
+target_outputs.append(get_last_output(gru(mask(target))))
 
 source_conc = Concatenate()(source_outputs)
 target_conc = Concatenate()(target_outputs)
@@ -133,27 +135,74 @@ model = Model(inputs=[source_input, target_input], outputs=logits)
 model.load_weights('../save/cnn.semeval.model.weights.0.6879')
 model.compile(optimizer='Adam', loss=kl_distance, metrics=[pearson])
 
-predict_model = Model(inputs=model.input,
-                                     outputs=[model.get_layer('conv1d_3').get_output_at(1),
-                                              model.get_layer('max_pooling1d_3').get_output_at(1)])
-pre_output = predict_model.predict([graph_sources, graph_targets], batch_size=1)
+kernel, recurrent_kernel, input_bias = model.get_layer('gru_1').get_weights()
 
-def get_info(conv_outputs, max_outputs):
-    for i in range(len(graph_scores)):
-        conv_output = conv_outputs[i]
-        max_output = max_outputs[i][0]
-        idx = dict()
-        for num_index, num in enumerate(max_output):
-            for seq_index in range(28):
-                if num == conv_output[seq_index][num_index]:
-                    if idx.has_key(seq_index):
-                        idx[seq_index] += 1
-                    else:
-                        idx[seq_index] = 1
-        print(idx)
-        print('--------------------------------------------')
+# source 0 target 1
+predict_model = Model(inputs=model.inputs, outputs=model.get_layer('embedding_1').get_output_at(1))
+predict_outputs = predict_model.predict([graph_sources, graph_targets])
 
-get_info(pre_output[0], pre_output[1])
+h_tml = np.zeros([1, filter_num])
+
+# update gate
+kernel_z = kernel[:, :filter_num]
+recurrent_kernel_z = recurrent_kernel[:, :filter_num]
+# reset gate
+kernel_r = kernel[:, filter_num: filter_num * 2]
+recurrent_kernel_r = recurrent_kernel[:,filter_num: filter_num * 2]
+# new gate
+kernel_h = kernel[:, filter_num * 2:]
+recurrent_kernel_h = recurrent_kernel[:, filter_num * 2:]
+
+input_bias_z = input_bias[:filter_num]
+input_bias_r = input_bias[filter_num: filter_num * 2]
+input_bias_h = input_bias[filter_num * 2:]
+
+def recurrent_activation(x):
+    x = 0.2 * x + 0.5
+    x[x > 1] = 1
+    x[x < 0] = 0
+    return x
+def activation(x):
+    return (np.exp(x) - np.exp(-x)) / (np.exp(x) + np.exp(-x))
+def call(inputs, h_tm1):
+    inputs_z = inputs
+    inputs_r = inputs
+    inputs_h = inputs
+
+    x_z = np.dot(inputs_z, kernel_z)
+    x_r = np.dot(inputs_r, kernel_r)
+    x_h = np.dot(inputs_h, kernel_h)
+
+    x_z = np.add(x_z, input_bias_z)
+    x_r = np.add(x_r, input_bias_r)
+    x_h = np.add(x_h, input_bias_h)
+
+    h_tm1_z = h_tm1
+    h_tm1_r = h_tm1
+    h_tm1_h = h_tm1
+
+    recurrent_z = np.dot(h_tm1_z, recurrent_kernel_z)
+    recurrent_r = np.dot(h_tm1_r, recurrent_kernel_r)
+
+
+    z = recurrent_activation(x_z + recurrent_z)
+    r = recurrent_activation(x_r + recurrent_r)
+
+
+
+    recurrent_h = np.dot(r * h_tm1_h, recurrent_kernel_h)
+
+    hh = activation(x_h + recurrent_h)
+    print(np.sum(np.square(z)), np.sum(np.square(1 - z)))
+    h = z * h_tm1 + (1 - z) * hh
+    return h
+
+for i in range(3):
+    embedding = predict_outputs[i]
+    for j in range(seq_length):
+        h = call(embedding[j], h_tml)
+        h_tml = h
+    print('--------------------------------------')
 
 
 

@@ -14,7 +14,8 @@ import numpy as np
 train_path = '/home/raymond/Downloads/semeval_en/semeval.train.txt'
 dev_path = '/home/raymond/Downloads/semeval_en/semeval.dev.txt'
 test_path = '/home/raymond/Downloads/semeval_en/semeval.test.txt'
-embedding_path = '/home/raymond/Downloads/data/glove.6B.300d.txt'
+# embedding_path = '/home/raymond/Downloads/data/glove.6B.300d.txt'
+embedding_path = '/media/raymond/CE687D43687D2B7B/data/paragram_300_sl999.txt'
 
 
 seq_length = 30
@@ -24,7 +25,7 @@ filter_sizes = [1, 2, 3]
 filter_num = 300
 k = 3
 batch_size = 64
-epochs_num = 32
+epochs_num = 16
 drop_out_rate = 0.5
 regularizer_rate = 0.004
 
@@ -37,7 +38,7 @@ dev_sources, dev_targets, dev_scores = data_helper.load_cross_lang_sentence_data
 test_sources, test_targets, test_scores = data_helper.load_cross_lang_sentence_data(test_path, False)
 
 
-word2idx, word_embeddings = data_helper.load_embedding(embedding_path, True)
+word2idx, word_embeddings = data_helper.load_embedding2(embedding_path, True)
 
 
 # word to id
@@ -184,7 +185,7 @@ def main():
         if temp_pearson > max_test_pearson:
             max_test_pearson = temp_pearson
         print('')
-        if temp_pearson > 0.687:
+        if temp_pearson > 0.685:
             model.save_weights('../save/cnn.semeval.model.weights.' + str(round(temp_pearson, 4)))
 
     print('--- max dev pearson: %.4f --- max test pearson: %.4f ---' % (max_dev_pearson, max_test_pearson))

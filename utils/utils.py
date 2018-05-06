@@ -183,4 +183,18 @@ def weight2img(weights):
     img = Image.fromarray(weights)
     img.show()
 
-
+# lines = []
+#
+# f = open('/media/raymond/CE687D43687D2B7B/data/paragram_300_sl999.txt', 'r')
+# for i, line in enumerate(f.readlines()):
+#
+#     parts = line.decode('utf-8').strip().split(' ')
+#     if len(parts) == 301:
+#         lines.append(line)
+#
+# f.close()
+# f = open('/media/raymond/CE687D43687D2B7B/data/paragram_300_sl999_1.txt', 'w')
+# f.write(str(len(lines)) + ' 300\n')
+# for line in lines:
+#     f.write(line)
+# f.close()

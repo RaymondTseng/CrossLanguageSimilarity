@@ -13,7 +13,8 @@ import numpy as np
 train_path = '/home/raymond/Downloads/data/sts-train.csv'
 dev_path = '/home/raymond/Downloads/data/sts-dev.csv'
 test_path = '/home/raymond/Downloads/data/sts-test.csv'
-embedding_path = '/home/raymond/Downloads/data/glove.6B.300d.txt'
+# embedding_path = '/home/raymond/Downloads/data/glove.6B.300d.txt'
+embedding_path = '/media/raymond/CE687D43687D2B7B/data/paragram_300_sl999_1.txt'
 
 seq_length = 30
 class_num = 6

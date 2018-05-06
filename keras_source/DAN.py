@@ -1,14 +1,10 @@
-
 import data_helper
 from utils import utils
-from keras.layers import Dense, Input, Concatenate, Subtract, Multiply, Reshape, Lambda, Add, Activation
-from keras.layers import Conv1D, MaxPooling1D, Embedding, Dropout, regularizers, AveragePooling1D
+from keras.layers import Dense, Input, Concatenate, Subtract, Multiply, Reshape, Lambda, Add, Activation, GRU
+from keras.layers import Conv1D, MaxPooling1D, Embedding, Dropout, regularizers, AveragePooling1D, Concatenate
 from keras.models import Model
 import keras.backend as kb
 from keras.optimizers import *
-import numpy as np
-
-
 
 train_path = '/home/raymond/Downloads/data/sts-train.csv'
 dev_path = '/home/raymond/Downloads/data/sts-dev.csv'
@@ -87,50 +83,23 @@ embedding_layer = Embedding(len(word2idx),
 source = embedding_layer(source_input)
 target = embedding_layer(target_input)
 
-source_outputs = []
-target_outputs = []
-all_filter_num = len(filter_sizes) * filter_num
-for filter_size in filter_sizes:
-    conv = Conv1D(filter_num, filter_size, activation='relu', kernel_initializer='he_uniform', bias_initializer='he_uniform')
-    max_pool = MaxPooling1D(seq_length - filter_size + 1)
-    reshape = Reshape([filter_num])
+avg_pool = AveragePooling1D(pool_size=seq_length)
+reshape = Reshape([filter_num])
+avg_source = reshape(avg_pool(source))
+avg_target = reshape(avg_pool(target))
+w1 = Dense(filter_num, activation='tanh')
+w2 = Dense(filter_num, activation='tanh')
 
-    source_conv = conv(source)
-    target_conv = conv(target)
-
-    source_sdv = reshape(max_pool(source_conv))
-    target_sdv = reshape(max_pool(target_conv))
-
-    source_outputs.append(source_sdv)
-    target_outputs.append(target_sdv)
-
-source_outputs.append(Reshape([filter_num])(AveragePooling1D(seq_length)(source)))
-target_outputs.append(Reshape([filter_num])(AveragePooling1D(seq_length)(target)))
-
-source_conc = Concatenate()(source_outputs)
-target_conc = Concatenate()(target_outputs)
-
+avg_source = w2(w1(avg_source))
+avg_target = w2(w1(avg_target))
 
 abs = Lambda(lambda x: kb.abs(x))
-h_sub = abs(Subtract()([source_conc, target_conc]))
-h_mul = Multiply()([source_conc, target_conc])
+h_sub = abs(Subtract()([avg_source, avg_target]))
+h_mul = Multiply()([avg_source, avg_target])
 
+h_conc = Concatenate()([h_sub, h_mul])
 
-w1 = Dense(all_filter_num, activation='tanh', kernel_regularizer=regularizers.l2(regularizer_rate),
-                  bias_regularizer=regularizers.l2(regularizer_rate))
-w2 = Dense(all_filter_num, activation='tanh', kernel_regularizer=regularizers.l2(regularizer_rate),
-                  bias_regularizer=regularizers.l2(regularizer_rate))
-
-
-sdv = Add()([w1(h_sub), w2(h_mul)])
-
-
-
-output = Dense(all_filter_num, activation='tanh', kernel_regularizer=regularizers.l2(regularizer_rate),
-                  bias_regularizer=regularizers.l2(regularizer_rate))(sdv)
-output = Dropout(drop_out_rate)(output)
-logits = Dense(class_num, activation='softmax', kernel_regularizer=regularizers.l2(regularizer_rate),
-                  bias_regularizer=regularizers.l2(regularizer_rate))(output)
+logits = Dense(class_num, activation='softmax')(h_conc)
 
 
 max_dev_pearson = 0.
@@ -153,11 +122,3 @@ for epoch in range(epochs_num):
     print('')
 
 print('--- max dev pearson: %.4f --- max test pearson: %.4f ---' % (max_dev_pearson, max_test_pearson))
-
-
-
-
-
-
-
-

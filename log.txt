@@ -147,3 +147,18 @@ Primary --- test loss: 4.3095 --- test pearson: 0.687900 ---
 5. k-max pooling 1 + gru as feature
 --- max dev pearson: 0.8354 --- max test pearson: 0.6842 ---
 --- max dev pearson: 0.8322 --- max test pearson: 0.6735 ---
+
+
+paragram word2vec:
+Primary --- test pearson: 0.6776 ---
+Primary --- test pearson: 0.6805 --- test loss: 5.0282 ---
+Primary --- test pearson: 0.6857 --- test loss: 5.3136 ---
+Primary --- test pearson: 0.6805 --- test loss: 4.3846 ---
+Primary --- test pearson: 0.6836 --- test loss: 4.7344 ---
+Primary --- test pearson: 0.6770 --- test loss: 4.8784 ---
+Primary --- test pearson: 0.6759 --- test loss: 4.5197 ---
+Primary --- test pearson: 0.6700 --- test loss: 6.5543 ---
+Primary --- test pearson: 0.6749 --- test loss: 4.7136 ---
+
+
+

@@ -79,4 +79,23 @@ def load_embedding(path, zero):
             word2idx[vocab[i]] = i
     return word2idx, word_embedding
 
+def load_embedding2(path, zero):
+    word2idx = {}
+    vectors = None
+    f = open(path, 'r')
+    for i, line in enumerate(f.readlines()):
+        parts = line.decode('utf-8').strip().split(' ')
+
+        if i == 0:
+            vectors = np.zeros([int(parts[0]) + 1, int(parts[1])])
+        else:
+            word2idx[parts[0]] = i
+            vectors[i] = np.array(parts[1:], dtype=np.float)
+    word2idx['<0>'] = 0
+    return word2idx, vectors
+
+
+
+
+
 
