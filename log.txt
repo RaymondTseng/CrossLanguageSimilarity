@@ -159,6 +159,39 @@ Primary --- test pearson: 0.6770 --- test loss: 4.8784 ---
 Primary --- test pearson: 0.6759 --- test loss: 4.5197 ---
 Primary --- test pearson: 0.6700 --- test loss: 6.5543 ---
 Primary --- test pearson: 0.6749 --- test loss: 4.7136 ---
+Primary --- test pearson: 0.6729 --- test loss: 4.7295 ---
+
+
+
+avg_w2v:
+Primary --- test pearson: 0.6082 --- test loss: 4.4180 ---
+
+pro_avg_w2v:
+Primary --- test pearson: 0.6163 --- test loss: 4.0550 ---
+
+DAN:
+250/250 [==============================] - 0s 25us/step
+AR-AR --- test loss: 3.7990 --- test pearson: 0.6342 ---
+
+250/250 [==============================] - 0s 23us/step
+AR-EN --- test loss: 4.2513 --- test pearson: 0.6200 ---
+
+250/250 [==============================] - 0s 23us/step
+SP-SP --- test loss: 3.9117 --- test pearson: 0.6966 ---
+
+250/250 [==============================] - 0s 23us/step
+SP-EN --- test loss: 3.9151 --- test pearson: 0.6877 ---
+
+250/250 [==============================] - 0s 24us/step
+SP-EN-WMT --- test loss: 5.3443 --- test pearson: 0.2597 ---
+
+250/250 [==============================] - 0s 22us/step
+EN-EN --- test loss: 3.9271 --- test pearson: 0.6839 ---
+
+250/250 [==============================] - 0s 24us/step
+EN-TR --- test loss: 4.3942 --- test pearson: 0.5603 ---
+
+Primary --- test pearson: 0.5918 --- test loss: 4.2204 ---
 
 
 

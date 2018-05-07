@@ -6,10 +6,11 @@ from keras.models import Model
 import keras.backend as kb
 from keras.optimizers import *
 
-train_path = '/home/raymond/Downloads/data/sts-train.csv'
-dev_path = '/home/raymond/Downloads/data/sts-dev.csv'
-test_path = '/home/raymond/Downloads/data/sts-test.csv'
-embedding_path = '/home/raymond/Downloads/data/glove.6B.300d.txt'
+train_path = '/home/raymond/Downloads/semeval_en/semeval.train.txt'
+dev_path = '/home/raymond/Downloads/semeval_en/semeval.dev.txt'
+test_path = '/home/raymond/Downloads/semeval_en/semeval.test.txt'
+# embedding_path = '/home/raymond/Downloads/data/glove.6B.300d.txt'
+embedding_path = '/media/raymond/CE687D43687D2B7B/data/paragram_300_sl999.txt'
 
 seq_length = 30
 class_num = 6
@@ -24,12 +25,15 @@ regularizer_rate = 0.004
 
 
 
-print ("loading data...")
-train_sources, train_targets, train_scores = data_helper.load_sts_data(train_path)
-dev_sources, dev_targets, dev_scores = data_helper.load_sts_data(dev_path)
-test_sources, test_targets, test_scores = data_helper.load_sts_data(test_path)
+tracks = ['AR-AR', 'AR-EN', 'SP-SP', 'SP-EN', 'SP-EN-WMT', 'EN-EN', 'EN-TR']
 
-word2idx, word_embeddings = data_helper.load_embedding(embedding_path, True)
+
+print ("loading data...")
+train_sources, train_targets, train_scores = data_helper.load_cross_lang_sentence_data(train_path, True)
+dev_sources, dev_targets, dev_scores = data_helper.load_cross_lang_sentence_data(dev_path, True)
+test_sources, test_targets, test_scores = data_helper.load_cross_lang_sentence_data(test_path, False)
+
+word2idx, word_embeddings = data_helper.load_embedding2(embedding_path, True)
 
 
 # word to id
@@ -87,6 +91,7 @@ avg_pool = AveragePooling1D(pool_size=seq_length)
 reshape = Reshape([filter_num])
 avg_source = reshape(avg_pool(source))
 avg_target = reshape(avg_pool(target))
+
 w1 = Dense(filter_num, activation='tanh')
 w2 = Dense(filter_num, activation='tanh')
 
@@ -111,14 +116,29 @@ for epoch in range(epochs_num):
     model.fit([train_sources, train_targets], train_score_probs, epochs=1, batch_size=batch_size,
               validation_data=([dev_sources, dev_targets], dev_score_probs))
 
-    results = model.evaluate( [dev_sources, dev_targets], dev_score_probs, batch_size=len(dev_score_probs))
+    results = model.evaluate([dev_sources, dev_targets], dev_score_probs, batch_size=len(dev_score_probs))
     print('--- dev loss: %.4f --- dev pearson: %.4f ---' % (results[0], results[1]))
     if results[1] > max_dev_pearson:
         max_dev_pearson = results[1]
-    results = model.evaluate([test_sources, test_targets], test_score_probs, batch_size=len(test_score_probs))
-    print('--- test loss: %.4f --- test pearson: %.4f ---' % (results[0], results[1]))
-    if results[1] > max_test_pearson:
-        max_test_pearson = results[1]
+
+    temp_loss = 0.
+    temp_pearson = 0.
+    for i in range(7):
+        start = i * 250
+        end = start + 250
+        results = model.evaluate([test_sources[start:end], test_targets[start:end]], test_score_probs[start:end],
+                                 batch_size=250)
+        print(tracks[i] + ' --- test loss: %.4f --- test pearson: %.4f ---' % (results[0], results[1]))
+        temp_loss += results[0]
+        temp_pearson += results[1]
+    print('')
+    temp_loss /= 7
+    temp_pearson /= 7
+    print('Primary --- test pearson: %.4f --- test loss: %.4f ---' % (temp_pearson, temp_loss))
+    if temp_pearson > max_test_pearson:
+        max_test_pearson = temp_pearson
     print('')
 
+
 print('--- max dev pearson: %.4f --- max test pearson: %.4f ---' % (max_dev_pearson, max_test_pearson))
+

@@ -25,10 +25,9 @@ filter_sizes = [1, 2, 3]
 filter_num = 300
 k = 3
 batch_size = 64
-epochs_num = 16
+epochs_num = 10
 drop_out_rate = 0.5
 regularizer_rate = 0.004
-
 tracks = ['AR-AR', 'AR-EN', 'SP-SP', 'SP-EN', 'SP-EN-WMT', 'EN-EN', 'EN-TR']
 
 
@@ -160,13 +159,6 @@ def main():
         if results[1] > max_dev_pearson:
             max_dev_pearson = results[1]
 
-        # results = model.evaluate([test_sources, test_targets], test_score_probs, batch_size=250)
-        # print('--- test loss: %.4f --- test pearson: %.4f ---' % (results[0], results[1]))
-        # if results[1] > max_test_pearson:
-        #     max_test_pearson = results[1]
-        # print('')
-        # if results[1] > 0.76:
-        #     model.save_weights('../save/cnn.semeval.model.weights.' + str(round(results[1], 4)))
 
         temp_loss = 0.
         temp_pearson = 0.
