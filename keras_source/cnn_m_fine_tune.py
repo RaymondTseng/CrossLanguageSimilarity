@@ -13,7 +13,8 @@ import numpy as np
 train_path = '/home/raymond/Downloads/data/sts-train.csv'
 dev_path = '/home/raymond/Downloads/data/sts-dev.csv'
 test_path = '/home/raymond/Downloads/data/sts-test.csv'
-embedding_path = '/home/raymond/Downloads/data/glove.6B.300d.txt'
+# embedding_path = '/home/raymond/Downloads/data/glove.6B.300d.txt'
+embedding_path = '/media/raymond/CE687D43687D2B7B/data/paragram_300_sl999.txt'
 
 seq_length = 30
 class_num = 6
@@ -33,7 +34,7 @@ train_sources, train_targets, train_scores = data_helper.load_sts_data(train_pat
 dev_sources, dev_targets, dev_scores = data_helper.load_sts_data(dev_path)
 test_sources, test_targets, test_scores = data_helper.load_sts_data(test_path)
 
-word2idx, word_embeddings = data_helper.load_embedding(embedding_path, True)
+word2idx, word_embeddings = data_helper.load_embedding2(embedding_path, True)
 
 
 # word to id
@@ -91,7 +92,8 @@ source_outputs = []
 target_outputs = []
 all_filter_num = len(filter_sizes) * filter_num
 for filter_size in filter_sizes:
-    conv = Conv1D(filter_num, filter_size, activation='relu', kernel_initializer='he_uniform', bias_initializer='he_uniform')
+    conv = Conv1D(filter_num, filter_size, activation='relu', kernel_initializer='he_uniform',
+                  bias_initializer='he_uniform')
     max_pool = MaxPooling1D(seq_length - filter_size + 1)
     reshape = Reshape([filter_num])
 
@@ -138,8 +140,8 @@ logits = Dense(class_num, activation='softmax', kernel_regularizer=regularizers.
 max_dev_pearson = 0.
 max_test_pearson = 0.
 model = Model(inputs=[source_input, target_input], outputs=logits)
-model.load_weights('../save/cnn.model.weights.0.7931')
-tune_layers = [20]
+model.load_weights('../save/cnn.model.weights.0.7914')
+tune_layers = [19, 20]
 for i, layer in enumerate(model.layers):
     if i in tune_layers:
         pass
@@ -147,7 +149,7 @@ for i, layer in enumerate(model.layers):
         # layer.bias_regularizer = None
     else:
         layer.trainable = False
-adam = Adam(lr=1e-6)
+adam = Adam(lr=1e-4)
 model.compile(optimizer=adam, loss=kl_distance, metrics=[pearson])
 for epoch in range(tune_epochs_num):
     print('epoch num %s ' % epoch)
@@ -167,7 +169,7 @@ for epoch in range(tune_epochs_num):
     #     model.save_weights('../save/cnn.model.weights.' + str(round(results[1], 4)))
 
 
-print('--- max dev pearson: %.4f --- max test pearson: %.4f ---' % (max_dev_pearson, max_test_pearson))
+print('--- max dev pearson: %.4f --- max test pearson: %.6f ---' % (max_dev_pearson, max_test_pearson))
 
 
 

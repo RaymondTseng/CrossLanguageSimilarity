@@ -1,7 +1,7 @@
 import data_helper
 from utils import utils
-from keras.layers import Dense, Input, Concatenate, Subtract, Multiply, Reshape, Lambda, Add, Activation, GRU
-from keras.layers import Conv1D, MaxPooling1D, Embedding, Dropout, regularizers, AveragePooling1D, Concatenate
+from keras.layers import Dense, Input, Concatenate, Subtract, Multiply, Reshape, Lambda, Add, Activation, LSTM
+from keras.layers import Conv1D, MaxPooling1D, Embedding, Concatenate, Masking
 from keras.models import Model
 import keras.backend as kb
 from keras.optimizers import *
@@ -93,20 +93,14 @@ embedding_layer = Embedding(len(word2idx),
 source = embedding_layer(source_input)
 target = embedding_layer(target_input)
 
-avg_pool = AveragePooling1D(pool_size=seq_length)
-reshape = Reshape([filter_num])
-avg_source = reshape(avg_pool(source))
-avg_target = reshape(avg_pool(target))
-
-w1 = Dense(filter_num, activation='tanh')
-w2 = Dense(filter_num, activation='tanh')
-
-avg_source = w2(w1(avg_source))
-avg_target = w2(w1(avg_target))
+mask = Masking()
+lstm = LSTM(filter_num)
+source_lstm = lstm(mask(source))
+target_lstm = lstm(mask(target))
 
 abs = Lambda(lambda x: kb.abs(x))
-h_sub = abs(Subtract()([avg_source, avg_target]))
-h_mul = Multiply()([avg_source, avg_target])
+h_sub = abs(Subtract()([source_lstm, target_lstm]))
+h_mul = Multiply()([source_lstm, target_lstm])
 
 h_conc = Concatenate()([h_sub, h_mul])
 

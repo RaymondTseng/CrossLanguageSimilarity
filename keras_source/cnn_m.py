@@ -14,7 +14,7 @@ train_path = '/home/raymond/Downloads/data/sts-train.csv'
 dev_path = '/home/raymond/Downloads/data/sts-dev.csv'
 test_path = '/home/raymond/Downloads/data/sts-test.csv'
 # embedding_path = '/home/raymond/Downloads/data/glove.6B.300d.txt'
-embedding_path = '/media/raymond/CE687D43687D2B7B/data/paragram_300_sl999_1.txt'
+embedding_path = '/media/raymond/CE687D43687D2B7B/data/paragram_300_sl999.txt'
 
 seq_length = 30
 class_num = 6
@@ -22,7 +22,7 @@ embedding_size = 300
 filter_sizes = [1, 2, 3]
 filter_num = 300
 batch_size = 64
-epochs_num = 28
+epochs_num = 20
 drop_out_rate = 0.5
 regularizer_rate = 0.004
 
@@ -34,7 +34,7 @@ train_sources, train_targets, train_scores = data_helper.load_sts_data(train_pat
 dev_sources, dev_targets, dev_scores = data_helper.load_sts_data(dev_path)
 test_sources, test_targets, test_scores = data_helper.load_sts_data(test_path)
 
-word2idx, word_embeddings = data_helper.load_embedding(embedding_path, True)
+word2idx, word_embeddings = data_helper.load_embedding2(embedding_path, True)
 
 
 # word to id
@@ -94,7 +94,8 @@ def main():
     all_filter_num = len(filter_sizes) * filter_num
     for i, filter_size in enumerate(filter_sizes):
         conv = Conv1D(filter_num, filter_size, activation='relu', kernel_initializer='he_uniform',
-                      bias_initializer='he_uniform')
+                      bias_initializer='he_uniform', kernel_regularizer=regularizers.l2(regularizer_rate),
+                      bias_regularizer=regularizers.l2(regularizer_rate))
 
         max_pool = MaxPooling1D(seq_length - filter_size + 1)
         reshape = Reshape([filter_num])
@@ -110,7 +111,8 @@ def main():
 
 
     mask = Masking()
-    gru = GRU(filter_num, dropout=drop_out_rate, recurrent_dropout=0.2)
+    gru = GRU(filter_num, dropout=drop_out_rate, recurrent_dropout=0.2, kernel_regularizer=regularizers.l2(regularizer_rate),
+                      bias_regularizer=regularizers.l2(regularizer_rate))
 
     source_outputs.append(gru(mask(source)))
     target_outputs.append(gru(mask(target)))
@@ -159,7 +161,7 @@ def main():
         if results[1] > max_test_pearson:
             max_test_pearson = results[1]
         print('')
-        if results[1] > 0.7919:
+        if results[1] > 0.791:
             model.save_weights('../save/cnn.model.weights.' + str(round(results[1], 4)))
 
 

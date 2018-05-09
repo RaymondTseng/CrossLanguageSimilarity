@@ -27,7 +27,7 @@ k = 3
 batch_size = 64
 epochs_num = 10
 drop_out_rate = 0.5
-regularizer_rate = 0.004
+regularizer_rate = 0.008
 tracks = ['AR-AR', 'AR-EN', 'SP-SP', 'SP-EN', 'SP-EN-WMT', 'EN-EN', 'EN-TR']
 
 
@@ -99,7 +99,8 @@ def main():
     all_filter_num = len(filter_sizes) * filter_num
     for i, filter_size in enumerate(filter_sizes):
         conv = Conv1D(filter_num, filter_size, activation='relu', kernel_initializer='he_uniform',
-                      bias_initializer='he_uniform')
+                      bias_initializer='he_uniform', kernel_regularizer=regularizers.l2(regularizer_rate),
+                      bias_regularizer=regularizers.l2(regularizer_rate))
 
         max_pool = MaxPooling1D(seq_length - filter_size + 1)
         reshape = Reshape([filter_num])
@@ -115,7 +116,8 @@ def main():
 
 
     mask = Masking()
-    gru = GRU(filter_num, dropout=drop_out_rate, recurrent_dropout=0.2)
+    gru = GRU(filter_num, dropout=drop_out_rate, recurrent_dropout=0.2, kernel_regularizer=regularizers.l2(regularizer_rate),
+                      bias_regularizer=regularizers.l2(regularizer_rate))
 
     source_outputs.append(gru(mask(source)))
     target_outputs.append(gru(mask(target)))
@@ -177,14 +179,14 @@ def main():
         if temp_pearson > max_test_pearson:
             max_test_pearson = temp_pearson
         print('')
-        if temp_pearson > 0.685:
+        if temp_pearson > 0.6869:
             model.save_weights('../save/cnn.semeval.model.weights.' + str(round(temp_pearson, 4)))
 
     print('--- max dev pearson: %.4f --- max test pearson: %.4f ---' % (max_dev_pearson, max_test_pearson))
     model = None
 
-
-main()
+for i in range(5):
+    main()
 
 
 
